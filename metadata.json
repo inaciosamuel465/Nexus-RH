@@ -1,0 +1,8 @@
+{
+  "name": "Nexus HR - Sistema Completo de Gestão de RH",
+  "description": "Uma plataforma integrada para RH moderno seguindo as normas CLT e eSocial, com módulos de recrutamento, folha, ponto eletrônico e IA para análise de talentos.",
+  "requestFramePermissions": [
+    "camera",
+    "geolocation"
+  ]
+}
