@@ -1,7 +1,6 @@
-
 import React, { useState, useMemo } from 'react';
 import { useHR } from '../context/HRContext';
-import { Training, TrainingCategory, Employee, ContractType, EmployeeTraining, TrainingRequest } from '../types';
+import type { Training, TrainingCategory, Employee, ContractType, EmployeeTraining, TrainingRequest } from '../types';
 
 const AssignTrainingModal: React.FC<{ 
   isOpen: boolean; 
