@@ -1,20 +1,22 @@
-
 import React, { useState, useMemo } from 'react';
 import { useHR } from '../context/HRContext';
 import { Employee } from '../types';
 
-// Removed non-existent import DEFAULT_OFFBOARDING_STEPS as it was not used and causing errors
-
 const FormalizeModal: React.FC<{ isOpen: boolean; onClose: () => void; employee: Employee; employeesList: Employee[]; onSave: (id: string, data: any) => void }> = ({ isOpen, onClose, employee, employeesList, onSave }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
-      <div className="bg-white rounded-[3rem] w-full max-w-xl shadow-2xl overflow-hidden animate-slideIn">
-        <div className="p-10 border-b border-gray-100 bg-indigo-50/50 text-indigo-900">
-          <h3 className="text-2xl font-black uppercase tracking-tighter italic">Formalizar Admissão</h3>
-          <p className="text-xs font-bold text-indigo-400 mt-1 uppercase">Defina os detalhes finais para {employee.name}</p>
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white border border-slate-200 rounded-none w-full max-w-xl shadow-2xl overflow-hidden animate-slideIn">
+        <div className="p-10 border-b border-slate-100 bg-slate-50 flex justify-between items-center">
+          <div>
+            <h3 className="text-xl font-bold text-slate-900 tracking-tight">Formalizar Admissão</h3>
+            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest leading-none">Dados Contratuais: {employee.name}</p>
+          </div>
+          <button onClick={onClose} className="p-2 transition-colors text-slate-400 hover:text-slate-900">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l18 18" /></svg>
+          </button>
         </div>
-        <form className="p-10 space-y-6" onSubmit={(e) => {
+        <form className="p-10 space-y-8" onSubmit={(e) => {
           e.preventDefault();
           const fd = new FormData(e.currentTarget);
           onSave(employee.id, {
@@ -34,34 +36,41 @@ const FormalizeModal: React.FC<{ isOpen: boolean; onClose: () => void; employee:
           });
           onClose();
         }}>
-          <div className="grid grid-cols-2 gap-4">
-            <div className="space-y-1 col-span-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Salário Final Acordado</label>
-              <input name="salary" required type="number" placeholder="Ex: 8500.00" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
+          <div className="space-y-6">
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Salário Base (R$)</label>
+              <input name="salary" required type="number" step="0.01" placeholder="0.00" className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 font-bold outline-none focus:border-blue-600 transition-colors bg-transparent" />
             </div>
-            <div className="space-y-1 col-span-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Gestor Imediato</label>
-              <select name="managerId" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold">
-                <option value="">Nenhum / Diretor</option>
+            <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Gestor Direto</label>
+              <select name="managerId" className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-blue-600 transition-colors bg-transparent">
+                <option value="">Nenhum / Direção Geral</option>
                 {employeesList.filter(e => e.id !== employee.id).map(e => <option key={e.id} value={e.id}>{e.name}</option>)}
               </select>
             </div>
-            <div className="space-y-1 col-span-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Banco</label>
-              <input name="bankName" required placeholder="Ex: Itaú Unibanco" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Agência</label>
-              <input name="agency" required placeholder="0001" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
-            </div>
-            <div className="space-y-1">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Conta</label>
-              <input name="account" required placeholder="12345-6" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
+            <div className="space-y-1.5 pt-4">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1 italic border-b border-slate-50 pb-1">Gateway Bancário</label>
+              <div className="space-y-6 pt-4">
+                 <div className="space-y-1.5">
+                    <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest ml-1">Instituição</label>
+                    <input name="bankName" required placeholder="Ex: Banco Itaú" className="w-full border-b border-slate-200 py-1.5 text-xs text-slate-900 outline-none focus:border-blue-600 transition-colors bg-transparent" />
+                 </div>
+                 <div className="grid grid-cols-2 gap-6">
+                    <div className="space-y-1.5">
+                       <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest ml-1">Agência</label>
+                       <input name="agency" required placeholder="0001" className="w-full border-b border-slate-200 py-1.5 text-xs text-slate-900 outline-none focus:border-blue-600 transition-colors bg-transparent" />
+                    </div>
+                    <div className="space-y-1.5">
+                       <label className="text-[8px] font-bold text-slate-400 uppercase tracking-widest ml-1">Conta Flow</label>
+                       <input name="account" required placeholder="12345-6" className="w-full border-b border-slate-200 py-1.5 text-xs text-slate-900 outline-none focus:border-blue-600 transition-colors bg-transparent" />
+                    </div>
+                 </div>
+              </div>
             </div>
           </div>
-          <div className="pt-6 flex gap-4">
-             <button type="button" onClick={onClose} className="flex-1 py-5 border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-500">Cancelar</button>
-             <button type="submit" className="flex-1 py-5 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all">Ativar Onboarding</button>
+          <div className="pt-8 flex gap-4">
+             <button type="button" onClick={onClose} className="flex-1 py-4 border border-slate-200 text-slate-400 text-[10px] font-bold uppercase tracking-widest hover:text-slate-900 transition-all">Cancelar</button>
+             <button type="submit" className="flex-[2] py-4 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-[0.2rem] hover:bg-blue-600 transition-all shadow-xl">Ativar Registro</button>
           </div>
         </form>
       </div>
@@ -76,25 +85,21 @@ const StepItem: React.FC<{
 }> = ({ label, completed, onClick }) => (
   <button 
     onClick={onClick}
-    className={`w-full flex items-center gap-3 p-3 rounded-2xl border transition-all text-left group
-      ${completed ? 'bg-green-50 border-green-100 text-green-700' : 'bg-gray-50 border-gray-100 text-gray-400 hover:border-blue-200 hover:bg-white hover:text-gray-600'}
+    className={`w-full flex items-center gap-4 p-5 border transition-all text-left relative overflow-hidden
+      ${completed ? 'bg-emerald-50 border-emerald-100 text-emerald-700' : 'bg-white border-slate-100 text-slate-400 hover:border-slate-900 hover:text-slate-900'}
     `}
   >
-    <div className={`w-5 h-5 rounded-full flex items-center justify-center border-2 transition-colors
-      ${completed ? 'bg-green-500 border-green-500 text-white' : 'border-gray-300 group-hover:border-blue-400'}
+    <div className={`w-4 h-4 rounded-none flex items-center justify-center border transition-all
+      ${completed ? 'bg-emerald-500 border-emerald-500 text-white' : 'border-slate-200'}
     `}>
       {completed && <svg className="w-3 h-3" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>}
     </div>
-    <span className="text-[11px] font-black uppercase tracking-tight">{label}</span>
+    <span className="text-[9px] font-bold uppercase tracking-widest italic">{label}</span>
   </button>
 );
 
 const Lifecycle: React.FC = () => {
   const { employees, addEmployee, updateEmployee } = useHR();
-  const [isAdmissionOpen, setIsAdmissionOpen] = useState(false);
-  const [isOffboardingOpen, setIsOffboardingOpen] = useState(false);
-  const [selectedTermId, setSelectedTermId] = useState('');
-  const [termReason, setTermReason] = useState('Pedido de Demissão');
   const [formalizingEmp, setFormalizingEmp] = useState<Employee | null>(null);
 
   const pendingFormalization = useMemo(() => {
@@ -137,88 +142,104 @@ const Lifecycle: React.FC = () => {
   };
 
   return (
-    <div className="space-y-10 animate-fadeIn pb-24">
-      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm">
-        <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-blue-200">
-            <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15" /></svg>
-          </div>
-          <div>
-            <h2 className="text-4xl font-black text-gray-900 tracking-tighter">Nexus Lifecycle</h2>
-            <p className="text-gray-500 font-medium">Entrada estratégica e saída humanizada de talentos.</p>
-          </div>
-        </div>
-        <div className="flex gap-4">
-          <button onClick={() => setIsAdmissionOpen(true)} className="px-10 py-5 bg-blue-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-blue-700 transition-all">+ Admissão Manual</button>
-          <button onClick={() => setIsOffboardingOpen(true)} className="px-10 py-5 bg-red-50 text-red-600 rounded-2xl font-black text-[10px] uppercase tracking-widest border border-red-100 hover:bg-red-100 transition-all">- Iniciar Offboarding</button>
-        </div>
-      </header>
+    <div className="space-y-8 animate-fadeIn pb-20">
+      {/* Banner de Lifecycle Estilizado */}
+      <div className="bg-slate-900 border border-slate-200 relative min-h-[220px] flex items-center px-10 overflow-hidden">
+         <img 
+            src="https://images.unsplash.com/photo-1517245386807-bb43f82c33c4?auto=format&fit=crop&q=80&w=1200" 
+            className="absolute inset-0 w-full h-full object-cover opacity-10 grayscale"
+            alt="Lifecycle"
+         />
+         <div className="relative z-10 w-full flex flex-col lg:flex-row justify-between items-center gap-8">
+            <div className="text-center lg:text-left">
+               <h1 className="text-3xl font-bold text-white tracking-tight">Ciclagem de Capital Humano</h1>
+               <p className="text-sm text-slate-400 mt-2 max-w-md font-medium italic">Monitoria do fluxo vital corporativo: Admissão, Acoplagem Neurossocial e Dissolução Contratual.</p>
+            </div>
+            
+            <div className="flex gap-4">
+               <div className="bg-white/5 border border-white/10 p-6 flex items-center gap-6">
+                  <div className="text-center">
+                     <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Aguardando</p>
+                     <p className="text-2xl font-bold text-white tracking-tighter leading-none">{pendingFormalization.length}</p>
+                  </div>
+                  <div className="w-px h-8 bg-white/10"></div>
+                  <div className="text-center">
+                     <p className="text-[8px] font-bold text-slate-500 uppercase tracking-widest mb-1">Em Curso</p>
+                     <p className="text-2xl font-bold text-white tracking-tighter leading-none">{onboardingList.length}</p>
+                  </div>
+               </div>
+            </div>
+         </div>
+      </div>
 
-      {/* NOVO: Fila de Formalização */}
-      {pendingFormalization.length > 0 && (
-        <section className="bg-indigo-900 p-10 rounded-[3rem] shadow-2xl shadow-indigo-100 relative overflow-hidden">
-          <div className="absolute top-0 right-0 p-10 opacity-10 pointer-events-none">
-             <svg className="w-32 h-32" fill="white" viewBox="0 0 24 24"><path d="M19 3H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-2 10h-4v4h-2v-4H7v-2h4V7h2v4h4v2z"/></svg>
-          </div>
-          <div className="flex items-center gap-3 mb-8">
-            <span className="w-3 h-8 bg-indigo-400 rounded-full"></span>
-            <h3 className="text-xl font-black text-white uppercase tracking-tighter">Aguardando Formalização ({pendingFormalization.length})</h3>
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {pendingFormalization.map(emp => (
-              <div key={emp.id} className="bg-white/10 backdrop-blur-md p-6 rounded-[2.5rem] border border-white/20 flex flex-col justify-between">
-                <div>
-                   <h4 className="text-lg font-black text-white">{emp.name}</h4>
-                   <p className="text-[10px] font-black text-indigo-300 uppercase tracking-widest">{emp.role} • {emp.department}</p>
-                   <p className="mt-4 text-[10px] text-indigo-200 italic">Vindo do Pipeline de Recrutamento Nexus AI</p>
-                </div>
-                <button 
-                  onClick={() => setFormalizingEmp(emp)}
-                  className="mt-6 w-full py-4 bg-white text-indigo-900 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-indigo-50 transition-all"
-                >
-                  Formalizar Contrato
-                </button>
-              </div>
-            ))}
-          </div>
-        </section>
-      )}
-
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-10">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-12">
         <section className="space-y-8">
-          <div className="flex items-center gap-3 px-4">
-            <span className="w-3 h-8 bg-blue-600 rounded-full"></span>
-            <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Esteira de Onboarding</h3>
+          <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
+            <div className="w-1.5 h-1.5 bg-blue-600"></div>
+            <h3 className="text-[10px] font-bold text-slate-900 uppercase tracking-widest italic">Esteira de Onboarding</h3>
           </div>
-          <div className="grid gap-8">
-            {onboardingList.length === 0 ? (
-              <div className="p-20 text-center bg-white rounded-[3rem] border-2 border-dashed border-gray-100">
-                <p className="text-gray-400 font-bold italic">Nenhum processo de integração ativo.</p>
+          
+          <div className="space-y-8">
+            {pendingFormalization.length > 0 && (
+              <div className="bg-slate-50 border border-slate-200 p-8 space-y-6">
+                 <h4 className="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic border-b border-slate-100 pb-2">Pendência de Formalização</h4>
+                 <div className="grid gap-4">
+                    {pendingFormalization.map(emp => (
+                      <div key={emp.id} className="bg-white p-6 border border-slate-200 flex justify-between items-center group hover:border-slate-900 transition-all">
+                        <div>
+                           <p className="text-sm font-bold text-slate-900 uppercase italic tracking-tight">{emp.name}</p>
+                           <p className="text-[8px] font-bold text-blue-500 uppercase tracking-widest mt-1">{emp.role}</p>
+                        </div>
+                        <button 
+                          onClick={() => setFormalizingEmp(emp)}
+                          className="px-6 py-2 bg-slate-900 text-white text-[8px] font-bold uppercase tracking-widest hover:bg-blue-600 transition-all"
+                        >
+                          Formalizar
+                        </button>
+                      </div>
+                    ))}
+                 </div>
+              </div>
+            )}
+
+            {onboardingList.length === 0 && pendingFormalization.length === 0 ? (
+              <div className="py-24 text-center border-2 border-dashed border-slate-100 bg-white italic">
+                 <p className="text-slate-200 font-bold uppercase tracking-widest text-[9px]">Fluxo de Integração Limpo</p>
               </div>
             ) : (
               onboardingList.map(emp => {
                 const progress = calculateProgress(emp.onboardingTasks);
                 return (
-                  <div key={emp.id} className="bg-white p-10 rounded-[3rem] shadow-sm border border-gray-100 hover:shadow-2xl transition-all">
-                    <div className="flex justify-between items-start mb-8">
-                      <div className="flex items-center gap-5">
-                        <div className="w-16 h-16 rounded-3xl bg-blue-50 flex items-center justify-center text-blue-600 font-black text-xl">{emp.name[0]}</div>
-                        <div>
-                          <p className="text-lg font-black text-gray-900">{emp.name}</p>
-                          <p className="text-[11px] font-black text-gray-400 uppercase tracking-widest">{emp.role} • Salário R$ {emp.salary.toLocaleString()}</p>
+                  <div key={emp.id} className="bg-white border border-slate-200 p-8 shadow-sm group hover:border-slate-900 transition-all flex flex-col">
+                     <div className="flex justify-between items-start mb-10">
+                        <div className="flex items-center gap-6">
+                           <div className="w-16 h-16 bg-slate-900 text-white flex items-center justify-center text-xl font-bold italic">
+                              {emp.name[0]}
+                           </div>
+                           <div>
+                              <p className="text-lg font-bold text-slate-900 uppercase tracking-tighter italic leading-none mb-1">{emp.name}</p>
+                              <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{emp.role} &bull; Unidade Ativa</p>
+                           </div>
                         </div>
-                      </div>
-                      <div className="text-right">
-                        <p className={`text-[11px] font-black uppercase mb-2 ${progress === 100 ? 'text-green-600' : 'text-blue-600'}`}>{progress}% Concluído</p>
-                        <div className="w-32 h-2.5 bg-gray-100 rounded-full overflow-hidden"><div className={`h-full transition-all duration-700 ${progress === 100 ? 'bg-green-500' : 'bg-blue-600'}`} style={{ width: `${progress}%` }}></div></div>
-                      </div>
-                    </div>
-                    <div className="grid grid-cols-2 gap-4 mb-8">
-                      {emp.onboardingTasks?.map(task => <StepItem key={task.id} label={task.label} completed={task.completed} onClick={() => toggleOnboardingTask(emp.id, task.id)} />)}
-                    </div>
-                    {progress === 100 && (
-                      <button onClick={() => finalizeOnboarding(emp.id)} className="w-full py-5 bg-green-600 text-white rounded-2xl font-black text-[11px] uppercase tracking-widest shadow-xl hover:bg-green-700 transition-all">Finalizar Onboarding</button>
-                    )}
+                        <div className="text-right">
+                           <p className={`text-2xl font-bold tracking-tighter italic leading-none mb-1 ${progress === 100 ? 'text-emerald-600' : 'text-slate-900'}`}>{progress}%</p>
+                           <p className="text-[8px] font-bold text-slate-300 uppercase tracking-widest">Sincronia Pulse</p>
+                        </div>
+                     </div>
+
+                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4 mb-10">
+                        {emp.onboardingTasks?.map(task => 
+                          <StepItem key={task.id} label={task.label} completed={task.completed} onClick={() => toggleOnboardingTask(emp.id, task.id)} />
+                        )}
+                     </div>
+
+                     <div className="w-full h-1 bg-slate-50 mb-6 relative overflow-hidden">
+                        <div className={`h-full transition-all duration-1000 ${progress === 100 ? 'bg-emerald-500' : 'bg-blue-600'}`} style={{ width: `${progress}%` }}></div>
+                     </div>
+
+                     {progress === 100 && (
+                       <button onClick={() => finalizeOnboarding(emp.id)} className="w-full py-4 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-[0.4rem] hover:bg-emerald-600 transition-all shadow-xl animate-pulse">Consolidar Unidade</button>
+                     )}
                   </div>
                 );
               })
@@ -227,23 +248,44 @@ const Lifecycle: React.FC = () => {
         </section>
 
         <section className="space-y-8">
-          <div className="flex items-center gap-3 px-4">
-            <span className="w-3 h-8 bg-red-500 rounded-full"></span>
-            <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Fluxo de Desligamento</h3>
+          <div className="flex items-center gap-4 border-b border-slate-100 pb-4">
+            <div className="w-1.5 h-1.5 bg-red-600"></div>
+            <h3 className="text-[10px] font-bold text-slate-900 uppercase tracking-widest italic">Dissolução Contratual</h3>
           </div>
-          <div className="grid gap-8">
+          
+          <div className="space-y-6">
              {offboardingList.length === 0 ? (
-               <div className="p-20 text-center bg-white rounded-[3rem] border-2 border-dashed border-gray-100">
-                 <p className="text-gray-400 font-bold italic">Sem desligamentos pendentes.</p>
+               <div className="py-24 text-center border-2 border-dashed border-slate-100 bg-white italic opacity-50">
+                  <p className="text-slate-200 font-bold uppercase tracking-widest text-[9px]">Sem Protocolos de Saída</p>
                </div>
              ) : (
                offboardingList.map(emp => (
-                 <div key={emp.id} className="bg-white p-10 rounded-[3rem] border border-red-100 shadow-sm">
-                   <h4 className="font-black text-lg text-gray-900">{emp.name}</h4>
-                   <p className="text-xs font-bold text-red-500 uppercase tracking-widest">{emp.terminationDetails?.reason}</p>
+                 <div key={emp.id} className="bg-red-50 border border-red-100 p-8 flex flex-col md:flex-row justify-between items-center gap-8 group hover:bg-white transition-all">
+                    <div className="text-center md:text-left">
+                       <h4 className="font-bold text-xl text-slate-900 italic tracking-tighter uppercase leading-none mb-2">{emp.name}</h4>
+                       <p className="text-[9px] font-bold text-red-500 uppercase tracking-widest italic">{emp.terminationDetails?.reason}</p>
+                    </div>
+                    <button className="px-8 py-3 bg-red-600 text-white text-[9px] font-bold uppercase tracking-widest hover:bg-slate-900 transition-all shadow-lg shadow-red-500/10">Processar Registro</button>
                  </div>
                ))
              )}
+          </div>
+
+          <div className="bg-slate-50 p-8 border border-slate-200">
+             <h4 className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-6 border-b border-slate-100 pb-2">Status Legislativo eSocial</h4>
+             <div className="space-y-4">
+                <div className="flex justify-between items-center">
+                   <span className="text-[10px] font-bold text-slate-900 uppercase">S-2200 Recibo</span>
+                   <span className="text-[10px] font-mono text-emerald-600 font-bold">READY</span>
+                </div>
+                <div className="flex justify-between items-center">
+                   <span className="text-[10px] font-bold text-slate-900 uppercase">S-2299 Dissolução</span>
+                   <span className="text-[10px] font-mono text-blue-500 font-bold">QUEUE_EMPTY</span>
+                </div>
+                <p className="text-[9px] text-slate-400 leading-relaxed font-bold uppercase italic mt-4 pt-4 border-t border-slate-100">
+                  Os eventos de admissão e desligamento são processados de forma assíncrona com o portal do governo federal.
+                </p>
+             </div>
           </div>
         </section>
       </div>

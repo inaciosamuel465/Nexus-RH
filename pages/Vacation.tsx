@@ -1,7 +1,6 @@
-
 import React, { useState, useMemo, useEffect } from 'react';
 import { useHR } from '../context/HRContext';
-import { VacationRequest, Employee } from '../types';
+import { Employee } from '../types';
 
 const CollectiveVacationModal: React.FC<{ 
   isOpen: boolean; 
@@ -21,7 +20,6 @@ const CollectiveVacationModal: React.FC<{
   }, [employees, selectedDept]);
 
   useEffect(() => {
-    // Ao mudar de depto, limpa seleção ou marca todos do depto? Melhor limpar para segurança.
     setSelectedEmployees([]);
   }, [selectedDept]);
 
@@ -37,87 +35,86 @@ const CollectiveVacationModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-fadeIn">
-      <div className="bg-white rounded-[3rem] w-full max-w-2xl shadow-2xl overflow-hidden animate-slideIn flex flex-col max-h-[90vh]">
-        <div className="p-10 border-b border-gray-100 bg-indigo-600 text-white flex justify-between items-center">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-fadeIn">
+      <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 w-full max-w-2xl shadow-2xl animate-slideIn flex flex-col max-h-[90vh] relative">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
+        <div className="p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
           <div>
-            <h3 className="text-2xl font-black uppercase tracking-tighter italic">Férias Coletivas CLT</h3>
-            <p className="text-xs font-bold text-indigo-100 mt-1 uppercase opacity-80">Seleção Dinâmica de Equipe</p>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white uppercase italic tracking-tight">Agendar Férias Coletivas</h3>
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 mt-1 uppercase tracking-[0.3em] italic">Protocolo de Operação Estratégica</p>
           </div>
-          <button onClick={onClose} className="p-2 hover:bg-white/20 rounded-full transition-colors">
-            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l18 18" /></svg>
+          <button onClick={onClose} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
           </button>
         </div>
 
-        <div className="flex-1 overflow-y-auto p-10 space-y-8 custom-scrollbar">
-          <div className="grid grid-cols-2 gap-6">
-             <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Data de Início</label>
-                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-indigo-500" />
+        <div className="flex-1 overflow-y-auto p-10 space-y-10 custom-scrollbar">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+             <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] italic ml-1">Início da Jornada de Descanso</label>
+                <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full border-b border-slate-200 dark:border-slate-800 py-3 text-sm text-slate-900 dark:text-white font-bold outline-none focus:border-blue-600 transition-colors bg-transparent italic" />
              </div>
-             <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Data de Término</label>
-                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-indigo-500" />
+             <div className="space-y-2">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] italic ml-1">Retorno Programado</label>
+                <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full border-b border-slate-200 dark:border-slate-800 py-3 text-sm text-slate-900 dark:text-white font-bold outline-none focus:border-blue-600 transition-colors bg-transparent italic" />
              </div>
           </div>
 
-          <div className="space-y-4">
-            <div className="flex justify-between items-end">
-               <div className="space-y-1 flex-1 pr-4">
-                  <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Filtrar Setor</label>
-                  <select value={selectedDept} onChange={e => setSelectedDept(e.target.value)} className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-indigo-500">
-                    {depts.map(d => <option key={d} value={d}>{d}</option>)}
+          <div className="space-y-6">
+            <div className="flex flex-col md:flex-row justify-between items-end gap-6">
+               <div className="space-y-2 flex-1 w-full">
+                  <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] italic ml-1">Segmentação por Unidade</label>
+                  <select value={selectedDept} onChange={e => setSelectedDept(e.target.value)} className="w-full border-b border-slate-200 dark:border-slate-800 py-3 text-sm text-slate-900 dark:text-white font-bold outline-none focus:border-blue-600 transition-colors bg-transparent italic">
+                    {depts.map(d => <option key={d} value={d} className="dark:bg-slate-900">{d}</option>)}
                   </select>
                </div>
-               <button type="button" onClick={selectAllFiltered} className="px-6 py-4 bg-indigo-50 text-indigo-600 rounded-2xl text-[10px] font-black uppercase tracking-widest hover:bg-indigo-100">Marcar Todos</button>
+               <button type="button" onClick={selectAllFiltered} className="px-8 py-3 border border-slate-200 dark:border-slate-800 text-[9px] font-bold uppercase tracking-[0.3em] italic hover:bg-slate-900 dark:hover:bg-blue-600 hover:text-white transition-all shadow-sm">Selecionar Grupo</button>
             </div>
 
-            <div className="bg-gray-50 rounded-3xl border border-gray-200 overflow-hidden">
-               <div className="max-h-60 overflow-y-auto p-2 space-y-1">
-                  {filteredEmployees.map(emp => (
-                    <label key={emp.id} className={`flex items-center justify-between p-4 rounded-2xl cursor-pointer transition-all ${selectedEmployees.includes(emp.id) ? 'bg-indigo-600 text-white shadow-lg' : 'hover:bg-white'}`}>
-                       <div className="flex items-center gap-3">
-                          <div className={`w-8 h-8 rounded-lg flex items-center justify-center font-bold text-xs ${selectedEmployees.includes(emp.id) ? 'bg-white/20' : 'bg-indigo-100 text-indigo-600'}`}>
-                             {emp.name[0]}
-                          </div>
-                          <div>
-                             <p className="text-xs font-bold leading-none mb-1">{emp.name}</p>
-                             <p className={`text-[8px] font-black uppercase ${selectedEmployees.includes(emp.id) ? 'text-indigo-200' : 'text-gray-400'}`}>{emp.role}</p>
-                          </div>
+            <div className="border border-slate-100 dark:border-slate-800 max-h-72 overflow-y-auto custom-scrollbar bg-slate-50 dark:bg-slate-900/50">
+               {filteredEmployees.map(emp => (
+                 <label key={emp.id} className={`flex items-center justify-between p-5 cursor-pointer transition-all border-b border-slate-100 dark:border-slate-800 last:border-0 ${selectedEmployees.includes(emp.id) ? 'bg-blue-50 dark:bg-blue-900/20' : 'hover:bg-white dark:hover:bg-slate-900'}`}>
+                    <div className="flex items-center gap-5">
+                       <div className={`w-10 h-10 rounded-none flex items-center justify-center font-bold text-[11px] italic transition-all ${selectedEmployees.includes(emp.id) ? 'bg-blue-600 text-white shadow-[0_5px_15px_rgba(37,99,235,0.4)]' : 'bg-slate-200 dark:bg-slate-800 text-slate-500'}`}>
+                          {emp.name[0]}
                        </div>
-                       <input 
-                        type="checkbox" 
-                        className="hidden" 
-                        checked={selectedEmployees.includes(emp.id)}
-                        onChange={() => toggleEmployee(emp.id)} 
-                       />
-                       <div className={`w-5 h-5 rounded-full border-2 flex items-center justify-center ${selectedEmployees.includes(emp.id) ? 'bg-white border-white' : 'border-gray-300'}`}>
-                          {selectedEmployees.includes(emp.id) && <svg className="w-3 h-3 text-indigo-600" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg>}
+                       <div>
+                          <p className="text-xs font-bold text-slate-900 dark:text-white uppercase italic truncate max-w-[180px]">{emp.name}</p>
+                          <p className="text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase italic tracking-widest">{emp.role}</p>
                        </div>
-                    </label>
-                  ))}
-               </div>
+                    </div>
+                    <input 
+                     type="checkbox" 
+                     className="hidden" 
+                     checked={selectedEmployees.includes(emp.id)}
+                     onChange={() => toggleEmployee(emp.id)} 
+                    />
+                    <div className={`w-5 h-5 border transition-all flex items-center justify-center ${selectedEmployees.includes(emp.id) ? 'bg-slate-900 dark:bg-blue-600 border-transparent shadow-md' : 'border-slate-300 dark:border-slate-700'}`}>
+                       {selectedEmployees.includes(emp.id) && <svg className="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20"><path d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" /></svg>}
+                    </div>
+                 </label>
+               ))}
             </div>
           </div>
 
-          <div className="p-6 bg-amber-50 rounded-[2rem] border border-amber-100 flex gap-4">
-             <div className="w-10 h-10 bg-amber-200 rounded-xl flex items-center justify-center text-amber-700">
-                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
+          <div className="p-6 bg-amber-50 dark:bg-amber-950/20 border-l-4 border-amber-400 flex gap-5 items-start">
+             <div className="w-8 h-8 rounded-full bg-amber-100 dark:bg-amber-900/50 flex items-center justify-center shrink-0">
+               <svg className="w-5 h-5 text-amber-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
              </div>
-             <p className="text-[10px] text-amber-800 font-bold leading-relaxed">
-                As férias coletivas não podem ser inferiores a 10 dias e podem ser gozadas em até 2 períodos anuais (Art. 139 CLT).
+             <p className="text-[10px] text-amber-800 dark:text-amber-200/70 font-bold uppercase italic leading-relaxed tracking-tight">
+                COMPLIANCE: Férias coletivas exigem período mínimo de 10 dias corridos. O cronograma Nexus ajustará os saldos automaticamente após validação.
              </p>
           </div>
         </div>
 
-        <div className="p-10 border-t border-gray-100 bg-gray-50 flex gap-4">
-           <button onClick={onClose} className="flex-1 py-5 border border-gray-200 rounded-2xl text-[10px] font-black uppercase tracking-widest text-gray-400 hover:bg-white">Cancelar</button>
+        <div className="p-10 border-t border-slate-100 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/50 flex gap-6">
+           <button onClick={onClose} className="flex-1 py-5 border border-slate-200 dark:border-slate-800 text-[10px] font-bold uppercase tracking-[0.3em] text-slate-400 dark:text-slate-600 hover:bg-white dark:hover:bg-slate-900 transition-all italic">Cancelar</button>
            <button 
             disabled={selectedEmployees.length === 0 || !startDate || !endDate}
             onClick={() => onSchedule(selectedEmployees, startDate, endDate)}
-            className="flex-[2] py-5 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-50"
+            className="flex-[2] py-5 bg-slate-900 dark:bg-blue-600 text-white text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-blue-700 dark:hover:bg-blue-500 transition-all disabled:opacity-30 shadow-[0_15px_40px_rgba(37,99,235,0.3)] italic"
            >
-              Agendar para {selectedEmployees.length} Colaboradores
+              Validar e Agendar para {selectedEmployees.length} Talentos
            </button>
         </div>
       </div>
@@ -139,141 +136,154 @@ const Vacation: React.FC = () => {
   }, [employees, selectedDeptFilter]);
 
   return (
-    <div className="space-y-10 animate-fadeIn pb-24">
-      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden">
-        <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-3xl flex items-center justify-center text-white shadow-xl">
-             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>
-          </div>
-          <div>
-            <h2 className="text-4xl font-black text-gray-900 tracking-tighter italic leading-none uppercase">Central de Descanso</h2>
-            <p className="text-gray-500 font-medium mt-2">Planejamento e conformidade de ausências.</p>
-          </div>
-        </div>
-        <div className="flex gap-4">
-          <button onClick={() => setIsCollectiveModalOpen(true)} className="px-10 py-5 bg-gray-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl hover:bg-black transition-all">
-             Agendar Coletivas
-          </button>
-          <div className="bg-gray-100 p-1.5 rounded-2xl flex">
-            <button onClick={() => setActiveTab('calendar')} className={`px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'calendar' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400'}`}>Calendário</button>
-            <button onClick={() => setActiveTab('pending')} className={`px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all relative ${activeTab === 'pending' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400'}`}>
-              Solicitações
-              {pendingRequests.length > 0 && <span className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 text-white text-[9px] flex items-center justify-center rounded-full border-2 border-white">{pendingRequests.length}</span>}
-            </button>
-          </div>
-        </div>
-      </header>
+    <div className="space-y-8 animate-fadeIn pb-20">
+      <div className="bg-slate-900 border border-slate-200 dark:border-slate-800 relative min-h-[220px] flex items-center px-10 overflow-hidden shadow-2xl">
+         <img 
+            src="https://images.unsplash.com/photo-1473116763249-2faaef81ccda?auto=format&fit=crop&q=80&w=1200" 
+            className="absolute inset-0 w-full h-full object-cover opacity-10 grayscale"
+            alt="Vacation"
+         />
+         <div className="relative z-10 w-full flex flex-col lg:flex-row justify-between items-center gap-8 animate-slideDown">
+            <div>
+               <h1 className="text-4xl font-bold text-white tracking-tighter uppercase italic">Engenharia de Descanso</h1>
+               <p className="text-sm text-slate-400 mt-2 max-w-lg font-medium italic leading-relaxed">Arquitetando o equilíbrio entre performance e bem-estar organizacional.</p>
+            </div>
+            
+            <div className="flex items-center gap-6">
+              <button 
+                onClick={() => setIsCollectiveModalOpen(true)} 
+                className="px-10 py-5 bg-white text-slate-900 text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-blue-600 hover:text-white transition-all duration-500 shadow-2xl hover:shadow-[0_15px_40px_rgba(37,99,235,0.4)] transform hover:-translate-y-1 italic shrink-0"
+              >
+                 Acionar Coletivas
+              </button>
+              <div className="bg-white/5 backdrop-blur-xl p-1 border border-white/10 flex shadow-2xl">
+                <button onClick={() => setActiveTab('calendar')} className={`px-6 py-3 text-[9px] font-bold uppercase tracking-[0.3em] italic transition-all duration-500 ${activeTab === 'calendar' ? 'bg-white text-slate-900 shadow-xl' : 'text-white/40 hover:text-white'}`}>Cronograma</button>
+                <button onClick={() => setActiveTab('pending')} className={`px-6 py-3 text-[9px] font-bold uppercase tracking-[0.3em] italic transition-all duration-500 relative ${activeTab === 'pending' ? 'bg-white text-slate-900 shadow-xl' : 'text-white/40 hover:text-white'}`}>
+                  Protocolos
+                  {pendingRequests.length > 0 && <span className="absolute -top-2 -right-2 w-5 h-5 bg-blue-600 text-white text-[9px] flex items-center justify-center rounded-none font-bold shadow-lg animate-pulse">{pendingRequests.length}</span>}
+                </button>
+              </div>
+            </div>
+         </div>
+      </div>
 
       {activeTab === 'calendar' ? (
-        <div className="space-y-8">
-           <div className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm">
-              <div className="flex justify-between items-center mb-10">
-                 <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter flex items-center gap-3">
-                   <div className="w-2 h-8 bg-indigo-600 rounded-full"></div>
-                   Linha do Tempo de Disponibilidade
+        <div className="nexus-card p-10 animate-fadeIn">
+           <div className="flex flex-col md:flex-row justify-between items-center gap-8 mb-12 pb-8 border-b border-slate-50 dark:border-slate-800">
+              <div className="flex items-center gap-4">
+                 <div className="w-1.5 h-8 bg-slate-900 dark:bg-blue-600"></div>
+                 <h3 className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-[0.3em] italic">
+                    Timeline de Disponibilidade
                  </h3>
-                 <div className="flex items-center gap-4">
-                    <span className="text-[10px] font-black text-gray-400 uppercase">Setor:</span>
-                    <select value={selectedDeptFilter} onChange={e => setSelectedDeptFilter(e.target.value)} className="px-4 py-2 bg-gray-50 border border-gray-200 rounded-xl font-bold text-xs outline-none">
-                       {departments.map(d => <option key={d}>{d}</option>)}
-                    </select>
-                 </div>
               </div>
+              <div className="flex items-center gap-6 bg-slate-50 dark:bg-slate-900/50 px-6 py-3 border border-slate-100 dark:border-slate-800">
+                 <span className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase italic tracking-widest">Unidade Operacional</span>
+                 <select value={selectedDeptFilter} onChange={e => setSelectedDeptFilter(e.target.value)} className="bg-transparent border-none text-[10px] font-bold uppercase text-slate-900 dark:text-white outline-none cursor-pointer italic">
+                    {departments.map(d => <option key={d} value={d} className="dark:bg-slate-900">{d}</option>)}
+                 </select>
+              </div>
+           </div>
 
-              <div className="space-y-4">
-                 <div className="flex border-b border-gray-100 pb-2 mb-2">
-                    <div className="w-48 text-[9px] font-black text-gray-400 uppercase">Colaborador</div>
-                    <div className="flex-1 grid grid-cols-4 gap-2 text-[9px] font-black text-gray-400 uppercase text-center">
+           <div className="overflow-x-auto no-scrollbar">
+              <div className="min-w-[1000px]">
+                 <div className="flex items-center px-10 pb-6 mb-8 border-b border-slate-50 dark:border-slate-800/50">
+                    <div className="w-80 text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.4em] italic leading-none">Capital Humano</div>
+                    <div className="flex-1 grid grid-cols-4 gap-8 text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.4em] italic text-center leading-none">
                        <span>Nov 24</span>
                        <span>Dez 24</span>
                        <span>Jan 25</span>
                        <span>Fev 25</span>
                     </div>
+                    <div className="w-40 text-right text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.4em] italic leading-none">Reservas</div>
                  </div>
                  
-                 {filteredEmployeesForGrid.map(emp => {
-                   const myRequests = vacationRequests.filter(r => r.employeeId === emp.id && r.status === 'Aprovado');
-                   return (
-                     <div key={emp.id} className="flex items-center group">
-                        <div className="w-48 pr-4">
-                           <p className="text-xs font-black text-gray-900 truncate">{emp.name}</p>
-                           <p className="text-[8px] font-bold text-gray-400 uppercase">{emp.department}</p>
-                        </div>
-                        <div className="flex-1 h-12 bg-gray-50 rounded-2xl relative overflow-hidden flex items-center px-4">
-                           {/* Renderização Mock de Timeline baseada nos dados */}
-                           {myRequests.map(r => (
-                             <div 
-                              key={r.id} 
-                              className={`h-8 rounded-xl absolute flex items-center justify-center px-4 border shadow-sm ${r.type === 'Coletiva' ? 'bg-indigo-100 border-indigo-200 text-indigo-700' : 'bg-blue-100 border-blue-200 text-blue-700'}`}
-                              style={{ left: r.startDate.includes('2024-11') ? '5%' : r.startDate.includes('2024-12') ? '30%' : '55%', width: '25%' }}
-                             >
-                                <span className="text-[8px] font-black uppercase truncate">{r.type === 'Coletiva' ? 'Coletivas' : 'Férias'}</span>
-                             </div>
-                           ))}
-                           {/* Grid Lines */}
-                           <div className="absolute inset-0 flex justify-between pointer-events-none opacity-5">
-                              {[1,2,3].map(i => <div key={i} className="w-px h-full bg-black"></div>)}
+                 <div className="space-y-4">
+                    {filteredEmployeesForGrid.map(emp => {
+                      const myRequests = vacationRequests.filter(r => r.employeeId === emp.id && r.status === 'Aprovado');
+                      return (
+                        <div key={emp.id} className="flex items-center p-4 hover:bg-slate-50/50 dark:hover:bg-slate-900/30 transition-all group border-b border-slate-50/50 dark:border-slate-800 last:border-0 relative">
+                           <div className="w-80 pr-10 flex items-center gap-5">
+                              <div className="w-12 h-12 rounded-none bg-slate-100 dark:bg-slate-800 flex items-center justify-center text-[12px] font-bold text-slate-400 uppercase italic transition-all group-hover:bg-slate-900 group-hover:text-white">{emp.name[0]}</div>
+                              <div className="min-w-0">
+                                 <p className="text-sm font-bold text-slate-900 dark:text-white uppercase italic tracking-tight leading-none mb-2 truncate">{emp.name}</p>
+                                 <p className="text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase italic tracking-widest">{emp.department}</p>
+                              </div>
+                           </div>
+                           <div className="flex-1 h-14 bg-slate-50/50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 relative overflow-hidden flex items-center px-6 shadow-inner">
+                              {myRequests.map(r => (
+                                <div 
+                                 key={r.id} 
+                                 className={`h-8 rounded-none absolute flex items-center justify-center px-4 border shadow-xl transition-all hover:scale-105 z-10 ${r.type === 'Coletiva' ? 'bg-blue-600 border-blue-500 text-white' : 'bg-white dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-900 dark:text-white'}`}
+                                 style={{ left: r.startDate.includes('2024-11') ? '5%' : r.startDate.includes('2024-12') ? '30%' : r.startDate.includes('2025-01') ? '55%' : '80%', width: '20%' }}
+                                >
+                                   <span className="text-[8px] font-bold uppercase tracking-[0.3em] truncate italic">{r.type === 'Coletiva' ? 'MÉTODO COLETIVO' : 'RECESSO MÉRITO'}</span>
+                                </div>
+                              ))}
+                              <div className="absolute inset-0 flex justify-between pointer-events-none opacity-[0.03] dark:opacity-[0.05]">
+                                {[1,2,3,4,5].map(i => <div key={i} className="w-px h-full bg-slate-900 dark:bg-white"></div>)}
+                              </div>
+                           </div>
+                           <div className="w-40 text-right pl-10">
+                              <span className={`text-2xl font-bold tabular-nums italic tracking-tighter transition-all group-hover:text-blue-600 ${emp.vacationBalance < 10 ? 'text-red-500' : 'text-slate-900 dark:text-white'}`}>{emp.vacationBalance} <span className="text-[9px] uppercase not-italic text-slate-400 dark:text-slate-600 ml-1 font-bold">dias</span></span>
                            </div>
                         </div>
-                        <div className="w-20 text-right pl-4">
-                           <span className={`text-[10px] font-black ${emp.vacationBalance < 10 ? 'text-red-500' : 'text-indigo-600'}`}>{emp.vacationBalance}d</span>
-                        </div>
-                     </div>
-                   );
-                 })}
+                      );
+                    })}
+                 </div>
               </div>
            </div>
         </div>
       ) : (
-        <div className="max-w-4xl mx-auto space-y-6">
+        <div className="space-y-8 animate-fadeIn">
            <div className="flex justify-between items-center px-4">
-              <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Fila de Aprovação</h3>
-              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{pendingRequests.length} pedidos pendentes</span>
+              <h3 className="text-[11px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.4em] italic border-l-4 border-blue-600 pl-6">Protocolos Pendentes de Aprovação</h3>
            </div>
            
            {pendingRequests.length === 0 ? (
-             <div className="p-32 text-center bg-white rounded-[4rem] border-2 border-dashed border-gray-100 flex flex-col items-center gap-6">
-                <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-200">
-                   <svg className="w-12 h-12" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+             <div className="nexus-card py-48 text-center border-dashed border-2 dark:border-slate-800 flex flex-col items-center justify-center">
+                <div className="w-20 h-20 bg-slate-50 dark:bg-slate-900/50 rounded-full flex items-center justify-center mb-8 border border-slate-100 dark:border-slate-800">
+                  <svg className="w-10 h-10 text-slate-200 dark:text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
                 </div>
-                <p className="text-gray-400 font-bold italic">Sem novas solicitações para analisar.</p>
+                <p className="text-slate-400 dark:text-slate-600 font-bold uppercase tracking-[0.4em] text-[10px] italic">Fila de aprovaçãoNexus zerada. Operação em dia.</p>
              </div>
            ) : (
-             pendingRequests.map(req => {
-               const emp = employees.find(e => e.id === req.employeeId);
-               return (
-                 <div key={req.id} className="bg-white p-10 rounded-[3.5rem] border border-gray-100 shadow-sm flex flex-col md:flex-row justify-between items-center gap-8 hover:shadow-2xl transition-all animate-fadeIn">
-                    <div className="flex items-center gap-6 flex-1">
-                       <div className="w-20 h-20 rounded-[2rem] bg-indigo-50 flex items-center justify-center text-indigo-600 text-2xl font-black shadow-inner">
-                          {emp?.name[0]}
-                       </div>
-                       <div>
-                          <h4 className="text-xl font-black text-gray-900 leading-none mb-2">{emp?.name}</h4>
-                          <div className="flex items-center gap-3">
-                             <span className="px-3 py-1 bg-gray-100 rounded-lg text-[9px] font-black text-gray-500 uppercase">{emp?.department}</span>
-                             <span className="text-[10px] font-bold text-indigo-400">Saldo: {emp?.vacationBalance} dias</span>
-                          </div>
-                       </div>
-                    </div>
-                    
-                    <div className="flex-1 border-x border-gray-50 px-8 py-2 text-center">
-                       <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Período Solicitado</p>
-                       <p className="text-base font-black text-gray-900">{new Date(req.startDate + 'T00:00:00').toLocaleDateString('pt-BR')} a {new Date(req.endDate + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
-                       <p className="text-[11px] font-black text-indigo-600 uppercase mt-1 italic">{req.days} dias de descanso</p>
-                       {req.sellTenDays && <span className="mt-2 inline-block px-3 py-1 bg-amber-50 text-amber-600 border border-amber-100 rounded-full text-[8px] font-black uppercase">Venda de 10 dias</span>}
-                    </div>
+             <div className="grid grid-cols-1 gap-6">
+               {pendingRequests.map(req => {
+                 const emp = employees.find(e => e.id === req.employeeId);
+                 return (
+                   <div key={req.id} className="nexus-card p-10 flex flex-col lg:flex-row justify-between items-center gap-10 hover:border-slate-900 dark:hover:border-blue-600 transition-all duration-700 group relative overflow-hidden">
+                      <div className="absolute top-0 right-0 w-40 h-40 bg-slate-50 dark:bg-slate-900/50 -mr-20 -mt-20 rotate-45 group-hover:bg-blue-600/5 transition-all"></div>
+                      <div className="flex items-center gap-8 flex-1 relative z-10">
+                         <div className="w-20 h-20 bg-slate-100 dark:bg-slate-900 flex items-center justify-center text-slate-400 dark:text-slate-600 text-2xl font-bold border border-slate-200 dark:border-slate-800 italic transition-all group-hover:bg-slate-900 dark:group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent">
+                            {emp?.name[0]}
+                         </div>
+                         <div>
+                            <h4 className="text-xl font-bold text-slate-900 dark:text-white uppercase italic tracking-tighter mb-2 group-hover:text-blue-600 transition-colors">{emp?.name}</h4>
+                            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase italic tracking-[0.2em]">{emp?.department} &bull; {emp?.vacationBalance} dias de competência</p>
+                         </div>
+                      </div>
+                      
+                      <div className="flex-1 dark:border-x dark:border-slate-800 px-10 text-center relative z-10">
+                         <p className="text-[10px] font-bold text-slate-300 dark:text-slate-700 uppercase tracking-[0.3em] mb-4 italic">Período de Afastamento</p>
+                         <p className="text-xl font-bold text-slate-900 dark:text-white italic tracking-tight">{new Date(req.startDate + 'T00:00:00').toLocaleDateString('pt-BR')} <span className="text-blue-600 mx-4 tracking-normal">&rarr;</span> {new Date(req.endDate + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                         <div className="flex items-center justify-center gap-4 mt-6">
+                            <span className="px-5 py-2 bg-blue-600 text-white text-[9px] font-bold uppercase tracking-widest italic shadow-xl">{req.days} NOITES NEXUS</span>
+                            {req.sellTenDays && <span className="px-5 py-2 bg-emerald-500 text-white text-[9px] font-bold uppercase tracking-widest italic shadow-xl">ABONO EXECUTIVO</span>}
+                         </div>
+                      </div>
 
-                    <div className="flex gap-3">
-                       <button onClick={() => rejectVacation(req.id)} className="w-14 h-14 bg-red-50 text-red-600 rounded-2xl flex items-center justify-center hover:bg-red-600 hover:text-white transition-all shadow-sm">
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M6 18L18 6M6 6l12 12" /></svg>
-                       </button>
-                       <button onClick={() => approveVacation(req.id)} className="w-14 h-14 bg-green-500 text-white rounded-2xl flex items-center justify-center hover:bg-green-600 transition-all shadow-xl shadow-green-100">
-                          <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg>
-                       </button>
-                    </div>
-                 </div>
-               );
-             })
+                      <div className="flex gap-6 relative z-10">
+                         <button onClick={() => rejectVacation(req.id)} className="w-14 h-14 bg-slate-50 dark:bg-slate-900 flex items-center justify-center text-slate-300 hover:text-red-500 border border-slate-100 dark:border-slate-800 hover:border-red-500 transition-all group/btn shadow-sm">
+                            <svg className="w-6 h-6 transition-transform group-hover/btn:rotate-90" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+                         </button>
+                         <button onClick={() => approveVacation(req.id)} className="px-12 py-4 bg-slate-900 dark:bg-blue-600 text-white text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-blue-700 dark:hover:bg-blue-500 transition-all shadow-[0_15_40px_rgba(37,99,235,0.3)] italic">
+                            Validar Protocolo
+                         </button>
+                      </div>
+                   </div>
+                 );
+               })}
+             </div>
            )}
         </div>
       )}
@@ -282,7 +292,7 @@ const Vacation: React.FC = () => {
         isOpen={isCollectiveModalOpen} 
         onClose={() => setIsCollectiveModalOpen(false)} 
         employees={employees}
-        onSchedule={(ids, s, e) => { scheduleCollectiveVacation(ids, s, e); setIsCollectiveModalOpen(false); alert('Férias coletivas agendadas com sucesso!'); }}
+        onSchedule={(ids, s, e) => { scheduleCollectiveVacation(ids, s, e); setIsCollectiveModalOpen(false); }}
       />
     </div>
   );

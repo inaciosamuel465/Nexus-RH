@@ -1,0 +1,118 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Nexus RH - Premium Design System */
+
+:root {
+  --primary: #2563eb;
+  --primary-hover: #1d4ed8;
+  --bg-main: #ffffff;
+  --bg-sidebar: #f8fafc;
+  --text-main: #0f172a;
+  --text-muted: #64748b;
+  --border-color: #e2e8f0;
+  --radius: 0px; /* Bordas retas conforme solicitado */
+  
+  --depth-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.05), 0 4px 6px -2px rgba(0, 0, 0, 0.02);
+  --premium-gradient: linear-gradient(135deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.dark {
+  --bg-main: #020617;
+  --bg-sidebar: #0f172a;
+  --text-main: #f8fafc;
+  --text-muted: #94a3b8;
+  --border-color: #1e293b;
+  --depth-shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.4);
+  --premium-gradient: linear-gradient(135deg, #0f172a 0%, #020617 100%);
+}
+
+@layer base {
+  body {
+    @apply text-slate-950 antialiased transition-colors duration-500 min-h-screen bg-slate-50;
+    font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    background-color: #ffffff;
+    background-image: radial-gradient(circle at 15% 50%, rgba(37, 99, 235, 0.04), transparent 30%),
+                      radial-gradient(circle at 85% 30%, rgba(37, 99, 235, 0.05), transparent 30%);
+    background-size: 150% 150%;
+    animation: subtleBluePan 15s ease-in-out infinite alternate;
+  }
+  
+  .dark body {
+    @apply text-slate-50;
+    background-color: #020617;
+    background-image: radial-gradient(circle at 15% 50%, rgba(37, 99, 235, 0.15), transparent 30%),
+                      radial-gradient(circle at 85% 30%, rgba(37, 99, 235, 0.1), transparent 30%);
+    background-size: 150% 150%;
+    animation: subtleBluePan 15s ease-in-out infinite alternate;
+  }
+}
+
+@keyframes subtleBluePan {
+  0% { background-position: 0% 50%; }
+  50% { background-position: 100% 50%; }
+  100% { background-position: 0% 50%; }
+}
+
+
+/* Premium Components */
+.nexus-card {
+  @apply border p-6 transition-all duration-300;
+  background: var(--premium-gradient);
+  border-color: var(--border-color);
+  box-shadow: var(--depth-shadow);
+  border-radius: var(--radius);
+}
+
+.nexus-card:hover {
+  transform: translateY(-4px) scale(1.005);
+  box-shadow: 0 25px 35px -5px rgba(37, 99, 235, 0.08), 0 10px 10px -5px rgba(37, 99, 235, 0.04);
+  border-color: rgba(37, 99, 235, 0.2);
+}
+
+.dark .nexus-card:hover {
+  transform: translateY(-4px) scale(1.005);
+  box-shadow: 0 30px 40px -5px rgba(0, 0, 0, 0.7), 0 15px 15px -5px rgba(37, 99, 235, 0.15);
+  border-color: rgba(37, 99, 235, 0.4);
+}
+
+.nexus-gradient-text {
+  @apply bg-clip-text text-transparent bg-gradient-to-r from-blue-600 to-indigo-600;
+}
+
+.dark .nexus-gradient-text {
+  @apply from-blue-400 to-indigo-400;
+}
+
+/* Scrollbar Premium */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  @apply bg-transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  @apply bg-slate-200 hover:bg-slate-300 transition-colors;
+}
+
+.dark ::-webkit-scrollbar-thumb {
+  @apply bg-slate-800 hover:bg-slate-700;
+}
+
+/* Recharts Premium Dark Mode */
+.dark .recharts-cartesian-grid-horizontal line,
+.dark .recharts-cartesian-grid-vertical line {
+  @apply stroke-slate-800;
+}
+
+.dark .recharts-default-tooltip {
+  @apply !bg-slate-900 !border-slate-800 !text-slate-200 !shadow-2xl;
+}
+
+.dark .recharts-text {
+  @apply !fill-slate-500;
+}

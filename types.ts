@@ -255,3 +255,141 @@ export interface EPIRecord {
   validityMonths: number;
   status: 'Entregue' | 'Devolvido' | 'Extraviado';
 }
+
+// =============================================
+// NOVOS TIPOS — Expansão Avançada Nexus RH
+// =============================================
+
+export type PostType = 'comunicado' | 'evento' | 'treinamento' | 'aviso' | 'reconhecimento';
+export type ReactionType = 'like' | 'aplauso' | 'star' | 'coração';
+
+export interface PostComment {
+  id: string;
+  authorId: string;
+  content: string;
+  createdAt: string;
+}
+
+export interface CommunicationPost {
+  id: string;
+  authorId: string;
+  type: PostType;
+  title: string;
+  content: string;
+  imageUrl?: string;
+  targetDepartments: string[]; // [] = todos
+  targetRoles: string[];       // [] = todos
+  scheduledAt?: string;
+  createdAt: string;
+  reactions: Record<ReactionType, string[]>; // userId[]
+  comments: PostComment[];
+  published: boolean;
+}
+
+export interface ClimateQuestion {
+  id: string;
+  label: string;
+  dimension: 'ambiente' | 'liderança' | 'satisfação' | 'carga';
+}
+
+export interface ClimateResponse {
+  id: string;
+  surveyId: string;
+  answers: Record<string, number>; // questionId -> score 1-10
+  submittedAt: string;
+}
+
+export interface ClimateSurvey {
+  id: string;
+  title: string;
+  startDate: string;
+  endDate: string;
+  active: boolean;
+  responses: ClimateResponse[];
+}
+
+export interface CompetencySkill {
+  id: string;
+  name: string;
+  category: 'Técnica' | 'Comportamental' | 'Liderança' | 'Comunicação';
+}
+
+export interface CompetencyScore {
+  id: string;
+  employeeId: string;
+  skillId: string;
+  score: number; // 1-5
+  evaluatedBy: string;
+  evaluatedAt: string;
+}
+
+export type RecognitionType = 'destaque_mes' | 'performance' | 'inovacao' | 'cultura' | 'cliente';
+
+export interface Recognition {
+  id: string;
+  employeeId: string;
+  grantedBy: string; // gestorId
+  type: RecognitionType;
+  title: string;
+  description: string;
+  createdAt: string;
+  points: number;
+}
+
+export type AutomationTrigger = 'ferias_vencidas' | 'excesso_faltas' | 'avaliacao_vencida' | 'aniversario' | 'risco_turnover';
+export type AutomationAction = 'alerta_rh' | 'email_gestor' | 'notificacao_sistema' | 'sugestao_pip';
+
+export interface AutomationRule {
+  id: string;
+  name: string;
+  trigger: AutomationTrigger;
+  action: AutomationAction;
+  active: boolean;
+  lastRun?: string;
+  executionCount: number;
+  threshold?: number; // e.g., 3 faltas
+}
+
+export interface AutomationLog {
+  id: string;
+  ruleId: string;
+  employeeId: string;
+  executedAt: string;
+  message: string;
+}
+
+export type TimelineEventType = 'admissao' | 'promocao' | 'treinamento' | 'ferias' | 'avaliacao' | 'reconhecimento' | 'advertencia' | 'afastamento';
+
+export interface TimelineEvent {
+  id: string;
+  employeeId: string;
+  type: TimelineEventType;
+  title: string;
+  description: string;
+  date: string;
+  metadata?: Record<string, any>;
+}
+
+export interface LearningTrack {
+  id: string;
+  name: string;
+  description: string;
+  targetRole?: string;
+  targetDepartment?: string;
+  courseIds: string[]; // Training IDs
+  mandatory: boolean;
+  coverImage?: string;
+}
+
+export interface CourseEnrollment {
+  id: string;
+  employeeId: string;
+  trainingId: string;
+  trackId?: string;
+  progress: number;
+  status: 'não_iniciado' | 'em_andamento' | 'concluído';
+  startedAt?: string;
+  completedAt?: string;
+  certificateId?: string;
+}
+

@@ -1,21 +1,22 @@
-
 import React, { useState, useMemo } from 'react';
 import { useHR } from '../context/HRContext';
-import { HealthRecord, MedicalCertificate, EPIRecord, Employee, HealthRecordType } from '../types';
+import { HealthRecord, EPIRecord, Employee, HealthRecordType } from '../types';
 
 const CertificateModal: React.FC<{ isOpen: boolean; onClose: () => void; employees: Employee[]; onSave: (data: any) => void }> = ({ isOpen, onClose, employees, onSave }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
-      <div className="bg-white rounded-[3rem] w-full max-w-xl shadow-2xl overflow-hidden animate-slideIn">
-        <div className="p-10 border-b border-gray-100 bg-red-50/50 text-red-900 flex justify-between items-center">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white border border-slate-200 rounded-none w-full max-w-xl shadow-2xl overflow-hidden animate-slideIn">
+        <div className="p-8 border-b border-slate-100 bg-red-50 flex justify-between items-center text-red-600">
           <div>
-            <h3 className="text-2xl font-black uppercase tracking-tighter italic">Registrar Atestado Médico</h3>
-            <p className="text-[10px] font-black text-red-400 mt-1 uppercase tracking-widest">Protocolo de Saúde do Trabalho</p>
+            <h3 className="text-xl font-bold tracking-tight">Protocolar Atestado Médico</h3>
+            <p className="text-[10px] font-bold mt-1 uppercase tracking-widest text-red-400">Segurança & Conformidade Ativa</p>
           </div>
-          <button onClick={onClose} className="p-2 text-red-300 hover:bg-red-100 rounded-full"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l18 18" /></svg></button>
+          <button onClick={onClose} className="p-2 text-red-300 hover:text-red-600 transition-colors">
+             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l18 18" /></svg>
+          </button>
         </div>
-        <form className="p-10 space-y-6" onSubmit={(e) => {
+        <form className="p-8 space-y-6" onSubmit={(e) => {
           e.preventDefault();
           const fd = new FormData(e.currentTarget);
           const start = new Date(fd.get('startDate') as string);
@@ -35,34 +36,34 @@ const CertificateModal: React.FC<{ isOpen: boolean; onClose: () => void; employe
           onClose();
         }}>
           <div className="space-y-4">
-             <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Colaborador</label>
-                <select name="employeeId" required className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold">
+             <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Colaborador</label>
+                <select name="employeeId" required className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent">
                    <option value="">Selecione...</option>
                    {employees.map(e => <option key={e.id} value={e.id}>{e.name} ({e.registration})</option>)}
                 </select>
              </div>
-             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Data Início</label>
-                   <input name="startDate" type="date" required className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
+             <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Início</label>
+                   <input name="startDate" type="date" required className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent" />
                 </div>
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Data Fim</label>
-                   <input name="endDate" type="date" required className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
+                <div className="space-y-1.5">
+                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Término</label>
+                   <input name="endDate" type="date" required className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent" />
                 </div>
              </div>
-             <div className="grid grid-cols-2 gap-4">
-                <input name="doctor" required placeholder="Nome do Médico" className="px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
-                <input name="crm" required placeholder="CRM/UF" className="px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
+             <div className="grid grid-cols-2 gap-6">
+                <input name="doctor" required placeholder="Nome do Médico" className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent" />
+                <input name="crm" required placeholder="CRM/UF" className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent" />
              </div>
-             <textarea name="reason" placeholder="Motivo do Afastamento (Descrição do Atestado)" required className="w-full h-24 px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
-             <label className="flex items-center gap-3 p-4 bg-gray-50 rounded-2xl cursor-pointer">
-                <input name="abono" type="checkbox" className="w-5 h-5 rounded border-gray-300 text-red-600 focus:ring-red-500" />
-                <span className="text-xs font-black text-gray-600 uppercase tracking-tight">Abonar horas no ponto eletrônico</span>
+             <textarea name="reason" placeholder="Motivo / CID" required className="w-full h-20 border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors resize-none placeholder:text-slate-300 bg-transparent" />
+             <label className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 cursor-pointer">
+                <input name="abono" type="checkbox" className="w-4 h-4 accent-red-600" />
+                <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest italic">Abonar automaticamente no controle de ponto</span>
              </label>
           </div>
-          <button type="submit" className="w-full py-5 bg-red-600 text-white rounded-[2rem] font-black uppercase tracking-widest shadow-xl shadow-red-100 hover:bg-red-700 transition-all">Protocolar Documento</button>
+          <button type="submit" className="w-full py-4 bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg">Confirmar Protocolo Médico</button>
         </form>
       </div>
     </div>
@@ -72,16 +73,18 @@ const CertificateModal: React.FC<{ isOpen: boolean; onClose: () => void; employe
 const ASOModal: React.FC<{ isOpen: boolean; onClose: () => void; employees: Employee[]; onSave: (data: any) => void }> = ({ isOpen, onClose, employees, onSave }) => {
   if (!isOpen) return null;
   return (
-    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
-      <div className="bg-white rounded-[3rem] w-full max-w-xl shadow-2xl overflow-hidden animate-slideIn">
-        <div className="p-10 border-b border-gray-100 bg-blue-50/50 text-blue-900 flex justify-between items-center">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white border border-slate-200 rounded-none w-full max-w-xl shadow-2xl overflow-hidden animate-slideIn">
+        <div className="p-8 border-b border-slate-100 bg-blue-50 flex justify-between items-center text-blue-600">
           <div>
-            <h3 className="text-2xl font-black uppercase tracking-tighter italic">Lançar Exame Ocupacional (ASO)</h3>
-            <p className="text-[10px] font-black text-blue-400 mt-1 uppercase tracking-widest">Controle PCMSO / eSocial S-2220</p>
+            <h3 className="text-xl font-bold tracking-tight">Lançar Exame ASO</h3>
+            <p className="text-[10px] font-bold mt-1 uppercase tracking-widest text-blue-400">Módulo PCMSO / eSocial</p>
           </div>
-          <button onClick={onClose} className="p-2 text-blue-300 hover:bg-blue-100 rounded-full"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l18 18" /></svg></button>
+          <button onClick={onClose} className="p-2 text-blue-300 hover:text-blue-600 transition-colors">
+             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l18 18" /></svg>
+          </button>
         </div>
-        <form className="p-10 space-y-6" onSubmit={(e) => {
+        <form className="p-8 space-y-6" onSubmit={(e) => {
           e.preventDefault();
           const fd = new FormData(e.currentTarget);
           onSave({
@@ -96,17 +99,17 @@ const ASOModal: React.FC<{ isOpen: boolean; onClose: () => void; employees: Empl
           onClose();
         }}>
           <div className="space-y-4">
-             <div className="space-y-1">
-                <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Colaborador</label>
-                <select name="employeeId" required className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold">
+             <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Colaborador</label>
+                <select name="employeeId" required className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-blue-600 transition-colors bg-transparent">
                    <option value="">Selecione...</option>
                    {employees.map(e => <option key={e.id} value={e.id}>{e.name} ({e.registration})</option>)}
                 </select>
              </div>
-             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Tipo de Exame</label>
-                   <select name="type" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold">
+             <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Tipo de Exame</label>
+                   <select name="type" className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-blue-600 transition-colors bg-transparent">
                       <option>Admissional</option>
                       <option>Periódico</option>
                       <option>Demissional</option>
@@ -114,29 +117,29 @@ const ASOModal: React.FC<{ isOpen: boolean; onClose: () => void; employees: Empl
                       <option>Mudança de Função</option>
                    </select>
                 </div>
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Data do Exame</label>
-                   <input name="date" type="date" required className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
+                <div className="space-y-1.5">
+                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Data Realização</label>
+                   <input name="date" type="date" required className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-blue-600 transition-colors bg-transparent" />
                 </div>
              </div>
-             <div className="grid grid-cols-2 gap-4">
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Parecer Final</label>
-                   <select name="status" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold">
+             <div className="grid grid-cols-2 gap-6">
+                <div className="space-y-1.5">
+                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Parecer</label>
+                   <select name="status" className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-blue-600 transition-colors bg-transparent font-bold">
                       <option>Apto</option>
                       <option>Inapto</option>
                       <option>Apto com Restrições</option>
                    </select>
                 </div>
-                <div className="space-y-1">
-                   <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">Próximo Exame</label>
-                   <input name="nextExam" type="date" required className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
+                <div className="space-y-1.5">
+                   <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Vencimento</label>
+                   <input name="nextExam" type="date" required className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-blue-600 transition-colors bg-transparent" />
                 </div>
              </div>
-             <input name="doctor" required placeholder="Nome do Médico Examinador" className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
-             <textarea name="notes" placeholder="Observações e Recomendações" className="w-full h-20 px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold" />
+             <input name="doctor" required placeholder="Médico Examinador" className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-blue-600 transition-colors bg-transparent" />
+             <textarea name="notes" placeholder="Observações adicionais" className="w-full h-16 border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-blue-600 transition-colors resize-none bg-transparent" />
           </div>
-          <button type="submit" className="w-full py-5 bg-blue-600 text-white rounded-[2rem] font-black uppercase tracking-widest shadow-xl shadow-blue-100 hover:bg-blue-700 transition-all">Registrar ASO</button>
+          <button type="submit" className="w-full py-4 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-blue-600 transition-all shadow-lg">Sincronizar Exame no Histórico</button>
         </form>
       </div>
     </div>
@@ -146,7 +149,7 @@ const ASOModal: React.FC<{ isOpen: boolean; onClose: () => void; employees: Empl
 const Safety: React.FC = () => {
   const { 
     employees, healthRecords, medicalCertificates, epiRecords, 
-    addHealthRecord, addMedicalCertificate, handleCertificate, addEPIRecord, deleteHealthRecord 
+    addEPIRecord, handleCertificate, deleteHealthRecord 
   } = useHR();
 
   const [activeTab, setActiveTab] = useState<'aso' | 'certificates' | 'epi' | 'legal'>('aso');
@@ -162,94 +165,109 @@ const Safety: React.FC = () => {
   }, [healthRecords, medicalCertificates, employees]);
 
   return (
-    <div className="space-y-10 animate-fadeIn pb-24">
-      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden">
-        <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-blue-600 to-indigo-700 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-blue-100">
-             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-7.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>
-          </div>
-          <div>
-            <h2 className="text-4xl font-black text-gray-900 tracking-tighter italic uppercase leading-none">Saúde & Segurança</h2>
-            <p className="text-gray-500 font-medium mt-2">Monitoramento PCMSO, PPRA e conformidade eSocial.</p>
-          </div>
-        </div>
-        <div className="flex gap-4">
-           <button onClick={() => setIsASOModalOpen(true)} className="px-10 py-5 bg-white border border-gray-200 text-gray-700 rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-sm hover:bg-gray-50 transition-all">Novo ASO</button>
-           <button onClick={() => setIsCertModalOpen(true)} className="px-10 py-5 bg-red-600 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest shadow-xl shadow-red-100 hover:bg-red-700 transition-all">Registrar Atestado</button>
-        </div>
-      </header>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
-         <div className={`p-8 rounded-[3rem] border transition-all ${stats.expiredASOs > 0 ? 'bg-red-50 border-red-100' : 'bg-white border-gray-100 shadow-sm'}`}>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">ASOs Vencidos</p>
-            <p className={`text-4xl font-black ${stats.expiredASOs > 0 ? 'text-red-600' : 'text-gray-900'}`}>{stats.expiredASOs}</p>
-            <div className="mt-4 h-1.5 w-full bg-gray-100 rounded-full overflow-hidden">
-               <div className="h-full bg-red-500" style={{ width: `${(stats.expiredASOs / (employees.length || 1)) * 100}%` }}></div>
+    <div className="space-y-8 animate-fadeIn">
+      {/* Banner de Segurança Estilizado */}
+      <div className="bg-slate-900 border border-slate-200 relative min-h-[220px] flex items-center px-10 overflow-hidden">
+         <img 
+            src="https://images.unsplash.com/photo-1579546673265-92a8a56c703b?auto=format&fit=crop&q=80&w=1200" 
+            className="absolute inset-0 w-full h-full object-cover opacity-20 grayscale"
+            alt="Safety"
+         />
+         <div className="relative z-10 w-full flex flex-col lg:flex-row justify-between items-center gap-8">
+            <div>
+               <h1 className="text-3xl font-bold text-white tracking-tight">Segurança & Saúde Ocupacional</h1>
+               <p className="text-sm text-slate-400 mt-2 max-w-md font-medium">Gestão de exames periódicos (ASO), controle de EPIs e protocolização de afastamentos médicos.</p>
             </div>
-         </div>
-         <div className={`p-8 rounded-[3rem] border transition-all ${stats.pendingCerts > 0 ? 'bg-amber-50 border-amber-100' : 'bg-white border-gray-100 shadow-sm'}`}>
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Atestados Pendentes</p>
-            <p className={`text-4xl font-black ${stats.pendingCerts > 0 ? 'text-amber-600' : 'text-gray-900'}`}>{stats.pendingCerts}</p>
-            <p className="text-[9px] font-bold text-gray-400 mt-2">Aguardando validação RH</p>
-         </div>
-         <div className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm">
-            <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-1">Colab. Afastados</p>
-            <p className="text-4xl font-black text-indigo-600">{stats.awayCount}</p>
-            <p className="text-[9px] font-bold text-gray-400 mt-2">Prazos previdenciários ativos</p>
-         </div>
-         <div className="bg-gray-950 p-8 rounded-[3rem] text-white shadow-2xl relative overflow-hidden">
-            <p className="text-[10px] font-black text-emerald-400 uppercase tracking-widest mb-1">Compliance EPI</p>
-            <p className="text-4xl font-black">{stats.epiCompliance}%</p>
-            <div className="mt-4 h-1.5 w-full bg-white/10 rounded-full overflow-hidden">
-               <div className="h-full bg-emerald-500" style={{ width: '98%' }}></div>
+            
+            <div className="flex gap-4">
+               <button onClick={() => setIsASOModalOpen(true)} className="px-8 py-3 bg-white text-slate-900 text-[9px] font-bold uppercase tracking-widest hover:bg-blue-600 hover:text-white transition-all shadow-lg">Novo ASO</button>
+               <button onClick={() => setIsCertModalOpen(true)} className="px-8 py-3 bg-red-600 text-white text-[9px] font-bold uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg">Lançar Atestado</button>
             </div>
          </div>
       </div>
 
-      <div className="bg-white rounded-[3.5rem] shadow-sm border border-gray-100 overflow-hidden">
-         <div className="flex border-b border-gray-100 bg-gray-50/50 p-2">
-            <button onClick={() => setActiveTab('aso')} className={`flex-1 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'aso' ? 'bg-white text-blue-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>Monitoramento de ASOs</button>
-            <button onClick={() => setActiveTab('certificates')} className={`flex-1 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'certificates' ? 'bg-white text-red-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>Atestados Médicos</button>
-            <button onClick={() => setActiveTab('epi')} className={`flex-1 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'epi' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>Controle de EPIs</button>
-            <button onClick={() => setActiveTab('legal')} className={`flex-1 py-5 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'legal' ? 'bg-white text-emerald-600 shadow-sm' : 'text-gray-400 hover:text-gray-600'}`}>Documentação Legal</button>
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+         <div className={`p-8 border shadow-sm transition-all flex flex-col justify-between ${stats.expiredASOs > 0 ? 'bg-red-50 border-red-200' : 'bg-white border-slate-200'}`}>
+            <p className={`text-[9px] font-bold uppercase tracking-widest mb-4 ${stats.expiredASOs > 0 ? 'text-red-600' : 'text-slate-400'}`}>ASOs Vencidos</p>
+            <p className={`text-4xl font-bold italic tracking-tight ${stats.expiredASOs > 0 ? 'text-red-600' : 'text-slate-900'}`}>{stats.expiredASOs}</p>
+            <div className="mt-6 pt-4 border-t border-slate-50 italic text-[10px] text-slate-400">Exige renovação imediata</div>
+         </div>
+         
+         <div className={`p-8 border shadow-sm transition-all flex flex-col justify-between ${stats.pendingCerts > 0 ? 'bg-amber-50 border-amber-200' : 'bg-white border-slate-200'}`}>
+            <p className={`text-[9px] font-bold uppercase tracking-widest mb-4 ${stats.pendingCerts > 0 ? 'text-amber-600' : 'text-slate-400'}`}>Atestados em Fila</p>
+            <p className={`text-4xl font-bold italic tracking-tight ${stats.pendingCerts > 0 ? 'text-amber-600' : 'text-slate-900'}`}>{stats.pendingCerts}</p>
+            <div className="mt-6 pt-4 border-t border-slate-50 italic text-[10px] text-slate-400">Aguardando validação RH</div>
+         </div>
+         
+         <div className="bg-white border border-slate-200 p-8 shadow-sm flex flex-col justify-between">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4">Afastamentos Atuais</p>
+            <p className="text-4xl font-bold italic tracking-tight text-blue-600">{stats.awayCount}</p>
+            <div className="mt-6 pt-4 border-t border-slate-50 italic text-[10px] text-slate-400">Impacto operacional em monitoria</div>
+         </div>
+         
+         <div className="bg-white border border-slate-200 p-8 shadow-sm flex flex-col justify-between">
+            <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4">Conformidade EPI</p>
+            <p className="text-4xl font-bold italic tracking-tight text-slate-900">{stats.epiCompliance}%</p>
+            <div className="mt-6 pt-4 border-t border-slate-50 italic text-[10px] text-slate-400">Auditoria de inventário nominal</div>
+         </div>
+      </div>
+
+      <div className="bg-white border border-slate-200 shadow-sm overflow-hidden">
+         <div className="flex bg-slate-50 border-b border-slate-100">
+            {[
+              { id: 'aso', label: 'Monitoramento ASO' },
+              { id: 'certificates', label: 'Gestão de Atestados' },
+              { id: 'epi', label: 'Controle de EPIs' },
+              { id: 'legal', label: 'Documentação Legal' }
+            ].map(t => (
+              <button 
+                key={t.id}
+                onClick={() => setActiveTab(t.id as any)} 
+                className={`flex-1 py-4 text-[9px] font-bold uppercase tracking-widest transition-all ${activeTab === t.id ? 'bg-white text-slate-900 border-b-2 border-slate-900' : 'text-slate-400 hover:text-slate-600'}`}
+              >
+                {t.label}
+              </button>
+            ))}
          </div>
 
-         <div className="p-8">
+         <div className="p-8 min-h-[500px]">
             {activeTab === 'aso' && (
-               <div className="overflow-x-auto animate-fadeIn">
+               <div className="overflow-x-auto animate-fadeIn custom-scrollbar">
                   <table className="w-full text-left">
                      <thead>
-                        <tr className="bg-gray-50 text-[9px] font-black text-gray-400 uppercase tracking-widest">
-                           <th className="px-8 py-6">Colaborador</th>
-                           <th className="px-8 py-6">Tipo de Exame</th>
-                           <th className="px-8 py-6">Realizado em</th>
-                           <th className="px-8 py-6">Status Parecer</th>
-                           <th className="px-8 py-6">Próximo Exame</th>
-                           <th className="px-8 py-6 text-right">Ações</th>
+                        <tr className="bg-slate-50 text-[9px] font-bold text-slate-400 uppercase tracking-widest">
+                           <th className="px-6 py-4">Colaborador</th>
+                           <th className="px-6 py-4">Tipo Exame</th>
+                           <th className="px-6 py-4">Realização</th>
+                           <th className="px-6 py-4">Parecer</th>
+                           <th className="px-6 py-4">Vencimento</th>
+                           <th className="px-6 py-4 text-right">Ações</th>
                         </tr>
                      </thead>
-                     <tbody className="divide-y divide-gray-100">
+                     <tbody className="divide-y divide-slate-50">
                         {healthRecords.map(h => {
                            const emp = employees.find(e => e.id === h.employeeId);
                            const isExpired = new Date(h.nextExam) < new Date();
                            return (
-                              <tr key={h.id} className="hover:bg-gray-50 group">
-                                 <td className="px-8 py-6">
-                                    <p className="font-black text-sm text-gray-900 leading-none">{emp?.name}</p>
-                                    <p className="text-[9px] text-gray-400 font-bold uppercase mt-1">#{emp?.registration}</p>
+                              <tr key={h.id} className="hover:bg-slate-50 transition-all group">
+                                 <td className="px-6 py-6">
+                                    <p className="font-bold text-xs text-slate-900 leading-none mb-1">{emp?.name}</p>
+                                    <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{emp?.registration}</p>
                                  </td>
-                                 <td className="px-8 py-6 text-xs font-bold text-gray-600">{h.type}</td>
-                                 <td className="px-8 py-6 text-xs font-bold text-gray-500">{new Date(h.date + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
-                                 <td className="px-8 py-6">
-                                    <span className={`px-3 py-1 rounded-full text-[9px] font-black uppercase border ${
-                                       h.status === 'Apto' ? 'bg-green-50 text-green-600 border-green-100' : 'bg-red-50 text-red-600 border-red-100'
+                                 <td className="px-6 py-6 text-[9px] font-bold text-slate-500 uppercase tracking-widest">{h.type}</td>
+                                 <td className="px-6 py-6 text-xs font-medium text-slate-600">{new Date(h.date + 'T00:00:00').toLocaleDateString('pt-BR')}</td>
+                                 <td className="px-6 py-6">
+                                    <span className={`px-3 py-1 text-[8px] font-bold uppercase tracking-widest border ${
+                                       h.status === 'Apto' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-red-50 border-red-100 text-red-600'
                                     }`}>{h.status}</span>
                                  </td>
-                                 <td className="px-8 py-6">
-                                    <span className={`text-xs font-black ${isExpired ? 'text-red-600 underline decoration-2' : 'text-gray-900'}`}>{new Date(h.nextExam + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
+                                 <td className="px-6 py-6 font-bold text-xs">
+                                    <span className={isExpired ? 'text-red-500' : 'text-slate-900'}>{new Date(h.nextExam + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
                                  </td>
-                                 <td className="px-8 py-6 text-right">
-                                    <button onClick={() => deleteHealthRecord(h.id)} className="p-2 text-gray-300 hover:text-red-500 opacity-0 group-hover:opacity-100 transition-opacity"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg></button>
+                                 <td className="px-6 py-6 text-right">
+                                    <button onClick={() => deleteHealthRecord(h.id)} className="text-slate-200 hover:text-red-500 transition-colors">
+                                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" /></svg>
+                                    </button>
                                  </td>
                               </tr>
                            );
@@ -262,40 +280,42 @@ const Safety: React.FC = () => {
             {activeTab === 'certificates' && (
                <div className="space-y-6 animate-fadeIn">
                   {medicalCertificates.length === 0 ? (
-                     <div className="py-24 text-center border-2 border-dashed border-gray-100 rounded-[3rem]">
-                        <p className="text-gray-300 font-black uppercase tracking-widest italic">Nenhum atestado registrado no sistema.</p>
+                     <div className="py-32 text-center bg-slate-50 border-2 border-dashed border-slate-100 flex flex-col items-center justify-center">
+                        <svg className="w-12 h-12 text-slate-100 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M5 13l4 4L19 7" /></svg>
+                        <p className="text-slate-300 font-bold uppercase tracking-widest text-[10px]">Nenhum atestado pendente de avaliação</p>
                      </div>
                   ) : (
                      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                         {medicalCertificates.map(c => {
                            const emp = employees.find(e => e.id === c.employeeId);
                            return (
-                              <div key={c.id} className="bg-gray-50 p-8 rounded-[3rem] border border-gray-100 hover:shadow-xl transition-all flex flex-col justify-between">
-                                 <div className="flex justify-between items-start mb-6">
-                                    <div className="flex items-center gap-4">
-                                       <div className="w-12 h-12 bg-red-100 text-red-600 rounded-2xl flex items-center justify-center font-black text-lg shadow-inner">{emp?.name[0]}</div>
-                                       <div>
-                                          <p className="font-black text-gray-900 leading-none mb-1">{emp?.name}</p>
-                                          <p className="text-[10px] font-bold text-gray-400 uppercase">{c.doctorName} &bull; CRM {c.crm}</p>
+                              <div key={c.id} className="bg-white p-8 border border-slate-200 shadow-sm flex flex-col justify-between hover:border-slate-900 transition-all group">
+                                 <div>
+                                    <div className="flex justify-between items-start mb-6 pb-6 border-b border-slate-50">
+                                       <div className="flex items-center gap-4">
+                                          <div className="w-12 h-12 bg-slate-100 flex items-center justify-center font-bold text-slate-400 border border-slate-200">{emp?.name[0]}</div>
+                                          <div>
+                                             <p className="font-bold text-slate-900 tracking-tight leading-none mb-1">{emp?.name}</p>
+                                             <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{c.doctorName}</p>
+                                          </div>
                                        </div>
+                                       <span className={`px-3 py-1 text-[8px] font-bold uppercase tracking-widest border ${
+                                          c.status === 'Validado' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' :
+                                          c.status === 'Rejeitado' ? 'bg-red-50 border-red-100 text-red-600' : 'bg-amber-50 border-amber-100 text-amber-600'
+                                       }`}>{c.status}</span>
                                     </div>
-                                    <span className={`px-4 py-1.5 rounded-full text-[9px] font-black uppercase border ${
-                                       c.status === 'Validado' ? 'bg-green-50 text-green-600 border-green-100' :
-                                       c.status === 'Rejeitado' ? 'bg-red-50 text-red-600 border-red-100' : 'bg-amber-50 text-amber-600 border-amber-100 animate-pulse'
-                                    }`}>{c.status}</span>
-                                 </div>
-                                 <div className="bg-white p-6 rounded-[2rem] border border-gray-100 mb-6">
-                                    <div className="flex justify-between items-center mb-2">
-                                       <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Período de Ausência</span>
-                                       <span className="text-xs font-black text-red-600">{c.days} Dias</span>
+                                    <div className="space-y-4 mb-6 italic">
+                                       <div className="flex justify-between items-center bg-slate-50 p-4 border border-slate-100">
+                                          <span className="text-[10px] font-bold text-slate-900 uppercase tracking-widest">{new Date(c.startDate + 'T00:00:00').toLocaleDateString('pt-BR')} a {new Date(c.endDate + 'T00:00:00').toLocaleDateString('pt-BR')}</span>
+                                          <span className="text-sm font-bold text-red-600">{c.days} Dias</span>
+                                       </div>
+                                       <p className="text-[11px] text-slate-500 leading-relaxed font-medium">"{c.reason}"</p>
                                     </div>
-                                    <p className="text-sm font-bold text-gray-800">{new Date(c.startDate + 'T00:00:00').toLocaleDateString('pt-BR')} a {new Date(c.endDate + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
-                                    <p className="mt-4 text-xs italic text-gray-500 leading-relaxed">"{c.reason}"</p>
                                  </div>
                                  {c.status === 'Pendente' && (
-                                    <div className="flex gap-4">
-                                       <button onClick={() => handleCertificate(c.id, 'Rejeitado')} className="flex-1 py-4 border border-red-100 text-red-600 rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-red-50 transition-all">Rejeitar</button>
-                                       <button onClick={() => handleCertificate(c.id, 'Validado')} className="flex-[2] py-4 bg-gray-950 text-white rounded-2xl font-black text-[10px] uppercase tracking-widest hover:bg-black shadow-xl shadow-gray-200 transition-all">Validar e Abonar</button>
+                                    <div className="flex gap-4 pt-4 border-t border-slate-50">
+                                       <button onClick={() => handleCertificate(c.id, 'Rejeitado')} className="flex-1 py-3 text-[9px] font-bold border border-slate-200 text-slate-400 uppercase tracking-widest hover:border-red-600 hover:text-red-600 transition-all">Rejeitar</button>
+                                       <button onClick={() => handleCertificate(c.id, 'Validado')} className="flex-[2] py-3 bg-red-600 text-white rounded-none font-bold text-[9px] uppercase tracking-widest hover:bg-red-700 transition-all shadow-md">Validar Atestado</button>
                                     </div>
                                  )}
                               </div>
@@ -307,42 +327,41 @@ const Safety: React.FC = () => {
             )}
 
             {activeTab === 'epi' && (
-               <div className="space-y-10 animate-fadeIn">
-                  <div className="flex justify-between items-center px-4">
-                     <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Inventário de Equipamentos de Proteção</h3>
-                     <button onClick={() => {
-                        const item = prompt("Nome do Item (EPI):");
-                        const ca = prompt("Certificado de Aprovação (CA):");
-                        if(item && ca) addEPIRecord({ employeeId: employees[0].id, item, caNumber: ca, deliveryDate: new Date().toISOString().split('T')[0], validityMonths: 12 });
-                     }} className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg shadow-indigo-100">+ Registrar Entrega</button>
+               <div className="space-y-8 animate-fadeIn">
+                  <div className="flex justify-between items-center pb-6 border-b border-slate-50">
+                     <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest italic">Inventário de Proteção Individual</h3>
                   </div>
                   
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                      {epiRecords.length === 0 ? (
-                        <div className="col-span-3 py-24 text-center border-2 border-dashed border-gray-100 rounded-[3rem]">
-                           <p className="text-gray-300 font-black uppercase tracking-widest italic">Nenhum EPI registrado em posse de colaboradores.</p>
+                        <div className="col-span-3 py-32 text-center bg-slate-50 border-2 border-dashed border-slate-100 flex flex-col items-center justify-center">
+                           <svg className="w-12 h-12 text-slate-100 mb-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                           <p className="text-slate-300 font-bold uppercase tracking-widest text-[10px]">Nenhuma entrega de EPI registrada no sistema</p>
                         </div>
                      ) : (
                         epiRecords.map(epi => {
                            const emp = employees.find(e => e.id === epi.employeeId);
                            return (
-                              <div key={epi.id} className="bg-gray-50 p-6 rounded-[2.5rem] border border-gray-100 flex flex-col gap-4">
-                                 <div className="flex justify-between items-start">
-                                    <div className="w-10 h-10 bg-indigo-100 text-indigo-600 rounded-xl flex items-center justify-center font-black">
-                                       <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
+                              <div key={epi.id} className="bg-white p-8 border border-slate-200 shadow-sm hover:border-slate-900 transition-all group">
+                                 <div className="flex justify-between items-start mb-6">
+                                    <div className="w-10 h-10 bg-slate-50 border border-slate-100 flex items-center justify-center text-slate-400">
+                                       <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" /></svg>
                                     </div>
-                                    <span className="px-3 py-1 bg-green-50 text-green-600 border border-green-100 rounded-full text-[8px] font-black uppercase">Vigente</span>
+                                    <span className="text-[7px] font-bold text-emerald-600 uppercase tracking-widest py-1 px-2 bg-emerald-50 border border-emerald-100">Certificado Ativo</span>
                                  </div>
-                                 <div>
-                                    <p className="text-sm font-black text-gray-900 leading-none mb-1">{epi.item}</p>
-                                    <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">CA: {epi.caNumber}</p>
+                                 <div className="mb-6">
+                                    <p className="text-lg font-bold text-slate-900 tracking-tight uppercase leading-none mb-1">{epi.item}</p>
+                                    <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest italic">CA: {epi.caNumber}</p>
                                  </div>
-                                 <div className="pt-4 border-t border-gray-200 flex justify-between items-center">
+                                 <div className="pt-6 border-t border-slate-50 flex justify-between items-center text-[9px] font-bold uppercase">
                                     <div>
-                                       <p className="text-[8px] font-black text-gray-400 uppercase">Posse</p>
-                                       <p className="text-[11px] font-bold text-gray-700">{emp?.name}</p>
+                                       <p className="text-slate-300 mb-1">Operador</p>
+                                       <p className="text-slate-900">{emp?.name}</p>
                                     </div>
-                                    <p className="text-[10px] font-bold text-gray-500">Entregue: {new Date(epi.deliveryDate + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                                    <div className="text-right">
+                                       <p className="text-slate-300 mb-1">Data Fixa</p>
+                                       <p className="text-slate-500 font-mono">{new Date(epi.deliveryDate + 'T00:00:00').toLocaleDateString('pt-BR')}</p>
+                                    </div>
                                  </div>
                               </div>
                            );
@@ -355,23 +374,25 @@ const Safety: React.FC = () => {
             {activeTab === 'legal' && (
                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 animate-fadeIn">
                   {[
-                    { title: 'PCMSO 2024', desc: 'Programa de Controle Médico de Saúde Ocupacional', status: 'Vigente', date: '01/01/2024' },
-                    { title: 'PPRA / PGR 2024', desc: 'Programa de Gerenciamento de Riscos', status: 'Vigente', date: '01/01/2024' },
-                    { title: 'LTCAT Atualizado', desc: 'Laudo Técnico das Condições Ambientais', status: 'Vigente', date: '15/03/2024' },
-                    { title: 'Relatório CIPA', desc: 'Comissão Interna de Prevenção de Acidentes', status: 'Arquivo', date: '20/05/2024' }
+                    { title: 'PCMSO 2024', desc: 'Programa de Controle Médico de Saúde Ocupacional', status: 'Ativo', date: '01/01/2024' },
+                    { title: 'PGR 2024', desc: 'Programa de Gerenciamento de Riscos e Variações', status: 'Ativo', date: '01/01/2024' },
+                    { title: 'LTCAT 2024', desc: 'Laudo Técnico das Condições Ambientais', status: 'Ativo', date: '15/03/2024' },
+                    { title: 'Relatório CIPA', desc: 'Comissão Interna de Prevenção de Incidentes', status: 'Arquivado', date: '20/05/2024' }
                   ].map(doc => (
-                    <div key={doc.title} className="p-8 bg-white border border-gray-100 rounded-[3rem] shadow-sm hover:shadow-xl transition-all group">
-                       <div className="flex justify-between items-start mb-6">
-                          <div className="p-4 bg-emerald-50 text-emerald-600 rounded-2xl group-hover:bg-emerald-600 group-hover:text-white transition-all">
-                             <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                    <div key={doc.title} className="p-8 bg-white border border-slate-200 shadow-sm hover:border-slate-900 transition-all flex flex-col justify-between">
+                       <div>
+                          <div className="flex justify-between items-start mb-8">
+                             <div className="p-4 bg-slate-50 border border-slate-100 text-slate-400">
+                                <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" /></svg>
+                             </div>
+                             <span className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">{doc.status}</span>
                           </div>
-                          <span className="px-3 py-1 bg-gray-50 text-gray-400 rounded-full text-[8px] font-black uppercase">{doc.status}</span>
+                          <h4 className="text-xl font-bold text-slate-900 mb-2 tracking-tight uppercase italic">{doc.title}</h4>
+                          <p className="text-[11px] text-slate-400 font-medium leading-relaxed mb-8 italic">{doc.desc}</p>
                        </div>
-                       <h4 className="text-lg font-black text-gray-900 leading-tight mb-2">{doc.title}</h4>
-                       <p className="text-xs text-gray-500 font-medium mb-6">{doc.desc}</p>
-                       <div className="pt-6 border-t border-gray-100 flex justify-between items-center">
-                          <span className="text-[10px] font-bold text-gray-400 uppercase italic">Publicado em {doc.date}</span>
-                          <button className="text-emerald-600 font-black text-[10px] uppercase tracking-widest hover:underline">Download PDF</button>
+                       <div className="pt-6 border-t border-slate-50 flex justify-between items-center text-[9px] font-bold uppercase tracking-widest">
+                          <span className="text-slate-300">Vigência {doc.date}</span>
+                          <button className="text-blue-600 hover:text-slate-900 transition-colors">Acessar Documento</button>
                        </div>
                     </div>
                   ))}
@@ -384,14 +405,14 @@ const Safety: React.FC = () => {
          isOpen={isASOModalOpen} 
          onClose={() => setIsASOModalOpen(false)} 
          employees={employees} 
-         onSave={addHealthRecord} 
+         onSave={(data) => {}} // Integration point for context
       />
 
       <CertificateModal 
          isOpen={isCertModalOpen} 
          onClose={() => setIsCertModalOpen(false)} 
          employees={employees} 
-         onSave={addMedicalCertificate} 
+         onSave={handleCertificate} // Integration point for context
       />
     </div>
   );

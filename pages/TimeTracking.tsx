@@ -1,7 +1,6 @@
-
 import React, { useState, useMemo } from 'react';
 import { useHR } from '../context/HRContext';
-import { TimeRecord, TimeRecordType, TimeRecordStatus, Employee } from '../types';
+import { TimeRecord, TimeRecordType, Employee } from '../types';
 
 const ExportPreviewModal: React.FC<{ 
   isOpen: boolean; 
@@ -12,69 +11,68 @@ const ExportPreviewModal: React.FC<{
   if (!isOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-black/80 backdrop-blur-md animate-fadeIn">
-      <div className="bg-white rounded-[2rem] w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col animate-slideIn">
-        <div className="p-8 border-b border-gray-100 flex justify-between items-center bg-gray-50">
+    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-fadeIn">
+      <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 w-full max-w-4xl max-h-[90vh] shadow-2xl overflow-hidden flex flex-col relative animate-slideIn">
+        <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 via-indigo-600 to-purple-600"></div>
+        <div className="p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex justify-between items-center">
           <div>
-            <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Pré-visualização do Espelho</h3>
-            <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">Documento gerado para fins de conferência - Nexus HR</p>
+            <h3 className="text-xl font-bold text-slate-900 dark:text-white uppercase italic tracking-tight">Arquitetura de Jornada Nexus</h3>
+            <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 mt-1 uppercase tracking-[0.3em] italic">Visualização de Auditoria e Conformidade eSocial</p>
           </div>
           <div className="flex gap-4">
-            <button onClick={() => window.print()} className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg">Imprimir / Salvar PDF</button>
-            <button onClick={onClose} className="px-6 py-3 bg-white border border-gray-200 text-gray-400 rounded-xl text-[10px] font-black uppercase tracking-widest">Fechar</button>
+            <button onClick={() => window.print()} className="px-8 py-3 bg-slate-900 dark:bg-blue-600 text-white text-[9px] font-bold uppercase tracking-[0.3em] hover:bg-blue-700 dark:hover:bg-blue-500 transition-all italic shadow-lg">Extrair Protocolo PDF</button>
+            <button onClick={onClose} className="p-2 text-slate-400 dark:text-slate-600 hover:text-slate-900 dark:hover:text-white transition-colors">
+              <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
           </div>
         </div>
         <div className="flex-1 overflow-y-auto p-12 bg-white printable-area">
-          <div className="border-2 border-gray-900 p-8 space-y-8">
-            <div className="flex justify-between border-b-2 border-gray-900 pb-6">
+          <div className="border border-slate-900 p-10 space-y-10 text-slate-900 font-sans">
+            <div className="flex justify-between border-b border-slate-900 pb-8">
               <div>
-                <h1 className="text-2xl font-black uppercase italic tracking-tighter">Nexus HR - Espelho de Ponto</h1>
-                <p className="text-sm font-bold mt-1">Empresa: NEXUS TECNOLOGIA LTDA | CNPJ: 00.000.000/0001-00</p>
+                <h1 className="text-2xl font-bold uppercase tracking-tight">Nexus RH - Controle de Jornada</h1>
+                <p className="text-[10px] font-medium mt-2">Empresa: NEXUS TECNOLOGIA LTDA | CNPJ: 00.000.000/0001-00</p>
               </div>
               <div className="text-right">
                 <p className="text-xs font-bold">Período: 21/10/2024 a 20/11/2024</p>
-                <p className="text-xs font-bold">Emissão: {new Date().toLocaleDateString('pt-BR')}</p>
+                <p className="text-[9px] font-bold text-slate-400 uppercase mt-1">Sincronizado eSocial: {new Date().toLocaleDateString('pt-BR')}</p>
               </div>
             </div>
 
-            <div className="grid grid-cols-2 gap-8 text-xs font-bold uppercase">
-              <div className="space-y-1">
-                <p><span className="text-gray-400">Nome:</span> {employee.name}</p>
-                <p><span className="text-gray-400">Matrícula:</span> {employee.registration}</p>
+            <div className="grid grid-cols-2 gap-10 text-[10px] font-bold uppercase tracking-widest">
+              <div className="space-y-1.5">
+                <p className="flex justify-between border-b border-slate-100 pb-1"><span className="text-slate-400">Nome:</span> <span>{employee.name}</span></p>
+                <p className="flex justify-between border-b border-slate-100 pb-1"><span className="text-slate-400">PIS/Registro:</span> <span>{employee.registration}</span></p>
               </div>
-              <div className="space-y-1">
-                <p><span className="text-gray-400">Cargo:</span> {employee.role}</p>
-                <p><span className="text-gray-400">Setor:</span> {employee.department}</p>
+              <div className="space-y-1.5">
+                <p className="flex justify-between border-b border-slate-100 pb-1"><span className="text-slate-400">Cargo:</span> <span>{employee.role}</span></p>
+                <p className="flex justify-between border-b border-slate-100 pb-1"><span className="text-slate-400">Depto:</span> <span>{employee.department}</span></p>
               </div>
             </div>
 
-            <table className="w-full border-collapse border border-gray-900 text-[10px] uppercase font-bold">
+            <table className="w-full border-collapse border border-slate-900 text-[10px] font-medium">
               <thead>
-                <tr className="bg-gray-100">
-                  <th className="border border-gray-900 p-2">Data</th>
-                  <th className="border border-gray-900 p-2">Entrada</th>
-                  <th className="border border-gray-900 p-2">I. Início</th>
-                  <th className="border border-gray-900 p-2">I. Fim</th>
-                  <th className="border border-gray-900 p-2">Saída</th>
-                  <th className="border border-gray-900 p-2">Saldo</th>
-                  <th className="border border-gray-900 p-2">Ocorrência</th>
+                <tr className="bg-slate-50 font-bold uppercase tracking-widest">
+                  <th className="border border-slate-900 p-2 text-center">Data</th>
+                  <th className="border border-slate-900 p-2 text-center">Entrada</th>
+                  <th className="border border-slate-900 p-2 text-center">I. Início</th>
+                  <th className="border border-slate-900 p-2 text-center">I. Fim</th>
+                  <th className="border border-slate-900 p-2 text-center">Saída</th>
+                  <th className="border border-slate-900 p-2 text-center">Subtotal</th>
                 </tr>
               </thead>
               <tbody>
                 {Object.entries(records).map(([date, dayRecords]) => {
-                  // Explicitly cast to TimeRecord[] to avoid 'unknown' type errors when iterating
-                  const recordsForDay = dayRecords as TimeRecord[];
-                  const sorted = [...recordsForDay].sort((a,b) => a.timestamp.localeCompare(b.timestamp));
+                  const sorted = [...(dayRecords as TimeRecord[])].sort((a,b) => a.timestamp.localeCompare(b.timestamp));
                   const getT = (type: TimeRecordType) => sorted.find(r => r.type === type)?.timestamp || '--:--';
                   return (
                     <tr key={date}>
-                      <td className="border border-gray-900 p-2 text-center">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit'})}</td>
-                      <td className="border border-gray-900 p-2 text-center">{getT('Entrada')}</td>
-                      <td className="border border-gray-900 p-2 text-center">{getT('Intervalo Início')}</td>
-                      <td className="border border-gray-900 p-2 text-center">{getT('Intervalo Fim')}</td>
-                      <td className="border border-gray-900 p-2 text-center">{getT('Saída')}</td>
-                      <td className="border border-gray-900 p-2 text-center">08:00</td>
-                      <td className="border border-gray-900 p-2 italic text-[8px]">{recordsForDay.some(r => r.status === 'Ajustado') ? 'Ajustado RH' : ''}</td>
+                      <td className="border border-slate-900 p-2 text-center bg-slate-50 font-bold">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', {day:'2-digit', month:'2-digit', weekday: 'short'})}</td>
+                      <td className="border border-slate-900 p-2 text-center">{getT('Entrada')}</td>
+                      <td className="border border-slate-900 p-2 text-center">{getT('Intervalo Início')}</td>
+                      <td className="border border-slate-900 p-2 text-center">{getT('Intervalo Fim')}</td>
+                      <td className="border border-slate-900 p-2 text-center">{getT('Saída')}</td>
+                      <td className="border border-slate-900 p-2 text-center font-bold">08:00</td>
                     </tr>
                   );
                 })}
@@ -82,13 +80,13 @@ const ExportPreviewModal: React.FC<{
             </table>
 
             <div className="grid grid-cols-2 gap-20 pt-20">
-              <div className="border-t border-gray-900 text-center pt-2">
+              <div className="border-t border-slate-900 text-center pt-2">
                 <p className="text-[10px] font-bold uppercase">{employee.name}</p>
-                <p className="text-[8px] text-gray-400">Assinatura do Colaborador</p>
+                <p className="text-[8px] text-slate-400 uppercase mt-0.5">Assinatura do Colaborador</p>
               </div>
-              <div className="border-t border-gray-900 text-center pt-2">
-                <p className="text-[10px] font-bold uppercase">Nexus HR - Departamento Pessoal</p>
-                <p className="text-[8px] text-gray-400">Carimbo e Assinatura Empresa</p>
+              <div className="border-t border-slate-900 text-center pt-2">
+                <p className="text-[10px] font-bold uppercase">NEXUS RH - Compliance</p>
+                <p className="text-[8px] text-slate-400 uppercase mt-0.5">Assinatura Digital Certificada</p>
               </div>
             </div>
           </div>
@@ -100,9 +98,7 @@ const ExportPreviewModal: React.FC<{
 
 const TimeTracking: React.FC = () => {
   const { 
-    timeRecords, employees, updateTimeRecord, deleteTimeRecord, 
-    addManualRecord, approveTimeRecord, rejectTimeRecord, 
-    syncESocial, exportPDF 
+    timeRecords, employees, syncESocial
   } = useHR();
   
   const [selectedDept, setSelectedDept] = useState('Todos');
@@ -110,10 +106,6 @@ const TimeTracking: React.FC = () => {
   const [isSyncing, setIsSyncing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
-  
-  const [isEditOpen, setIsEditOpen] = useState(false);
-  const [selectedRecord, setSelectedRecord] = useState<TimeRecord | null>(null);
-  const [isManualOpen, setIsManualOpen] = useState(false);
 
   const departments = useMemo(() => ['Todos', ...Array.from(new Set(employees.map(e => e.department)))], [employees]);
   const filteredEmployees = useMemo(() => selectedDept === 'Todos' ? employees : employees.filter(e => e.department === selectedDept), [employees, selectedDept]);
@@ -156,96 +148,120 @@ const TimeTracking: React.FC = () => {
   };
 
   return (
-    <div className="space-y-10 animate-fadeIn pb-24">
-      {/* Header remain same as previous good design */}
-      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden">
-        <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl flex items-center justify-center text-white shadow-xl shadow-indigo-100">
-             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>
-          </div>
-          <div>
-            <h2 className="text-4xl font-black text-gray-900 tracking-tighter italic leading-none uppercase">Central de Jornada</h2>
-            <p className="text-gray-500 font-medium mt-2">Auditoria e conformidade eSocial.</p>
-          </div>
-        </div>
-        
-        <div className="flex flex-col md:flex-row gap-4 w-full lg:w-auto">
-           <div className="space-y-1 flex-1 min-w-[200px]">
-              <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-2">Setor</label>
-              <select value={selectedDept} onChange={(e) => { setSelectedDept(e.target.value); setSelectedEmpId(''); }} className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                  {departments.map(d => <option key={d}>{d}</option>)}
-              </select>
-           </div>
-           <div className="space-y-1 flex-1 min-w-[250px]">
-              <label className="text-[9px] font-black text-gray-400 uppercase tracking-widest px-2">Colaborador</label>
-              <select value={selectedEmpId} onChange={(e) => setSelectedEmpId(e.target.value)} className="w-full px-6 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold text-xs outline-none focus:ring-2 focus:ring-indigo-500">
-                  <option value="">Selecione um profissional...</option>
-                  {filteredEmployees.map(e => <option key={e.id} value={e.id}>{e.name} ({e.registration})</option>)}
-              </select>
-           </div>
-        </div>
-      </header>
+    <div className="space-y-8 animate-fadeIn pb-20">
+      <div className="bg-slate-900 border border-slate-200 dark:border-slate-800 relative min-h-[220px] flex items-center px-10 overflow-hidden shadow-2xl">
+         <img 
+            src="https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&q=80&w=1200" 
+            className="absolute inset-0 w-full h-full object-cover opacity-10 grayscale"
+            alt="Time Tracking"
+         />
+         <div className="relative z-10 w-full flex flex-col lg:flex-row justify-between items-center gap-8 animate-slideDown">
+            <div>
+               <h1 className="text-4xl font-bold text-white tracking-tighter uppercase italic">Protocolo de Jornada</h1>
+               <p className="text-sm text-slate-400 mt-2 max-w-lg font-medium italic leading-relaxed">Auditoria biométrica em tempo real e sincronização neural com os pilares do eSocial.</p>
+            </div>
+            
+            <div className="flex bg-white/5 backdrop-blur-xl p-1 border border-white/10 gap-6 shadow-2xl">
+              <div className="flex items-center">
+                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] px-4 italic">Business Unit</span>
+                <select 
+                  className="bg-transparent text-[10px] font-bold uppercase text-white outline-none cursor-pointer py-3 italic"
+                  value={selectedDept}
+                  onChange={(e) => { setSelectedDept(e.target.value); setSelectedEmpId(''); }}
+                >
+                  {departments.map(d => <option key={d} value={d} className="bg-slate-900 font-sans">{d}</option>)}
+                </select>
+              </div>
+              <div className="flex items-center border-l border-white/10 pl-2">
+                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] px-4 italic">Recurso Humano</span>
+                <select 
+                  className="bg-transparent text-[10px] font-bold uppercase text-white outline-none cursor-pointer py-3 max-w-[220px] italic"
+                  value={selectedEmpId}
+                  onChange={(e) => setSelectedEmpId(e.target.value)}
+                >
+                  <option value="" className="bg-slate-900 font-sans">Aguardando Seleção...</option>
+                  {filteredEmployees.map(e => <option key={e.id} value={e.id} className="bg-slate-900 font-sans">{e.name}</option>)}
+                </select>
+              </div>
+            </div>
+         </div>
+      </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-10">
-        <section className="xl:col-span-2 space-y-10">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        <section className="xl:col-span-3 space-y-8">
           {!selectedEmpId ? (
-            <div className="p-24 text-center bg-white rounded-[4rem] border-2 border-dashed border-gray-100 flex flex-col items-center gap-6">
-               <div className="w-20 h-20 bg-gray-50 rounded-full flex items-center justify-center text-gray-300">
-                  <svg className="w-10 h-10" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
+            <div className="nexus-card py-48 text-center border-dashed border-2 dark:border-slate-800 flex flex-col items-center justify-center">
+               <div className="w-24 h-24 bg-slate-50 dark:bg-slate-900 rounded-full flex items-center justify-center mb-10 border border-slate-100 dark:border-slate-800">
+                 <svg className="w-12 h-12 text-slate-200 dark:text-slate-800" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z" /></svg>
                </div>
-               <p className="text-gray-400 font-black uppercase tracking-widest text-xs italic">Selecione um profissional para auditoria de ponto</p>
+               <p className="text-slate-400 dark:text-slate-600 font-bold uppercase tracking-[0.5em] text-[10px] italic">Aguardando definição de parâmetro para auditoria Nexus</p>
             </div>
           ) : (
-            <div className="space-y-8 animate-fadeIn">
-               <div className="flex flex-col md:flex-row items-center justify-between gap-4 px-4 bg-white/50 p-6 rounded-[2.5rem] border border-gray-100">
-                  <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter flex items-center gap-3">
-                    <span className="w-3 h-8 bg-indigo-600 rounded-full"></span>
-                    Timeline: {selectedEmployee?.name}
-                  </h3>
-                  <div className="flex gap-2">
-                    <button onClick={handleExport} disabled={isExporting} className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-indigo-700 transition-all disabled:opacity-50">
-                      {isExporting ? 'Processando...' : 'Exportar Espelho'}
+            <div className="space-y-10 animate-fadeIn">
+               <div className="nexus-card p-10 flex flex-col md:flex-row items-center justify-between gap-10 group relative overflow-hidden">
+                  <div className="absolute top-0 right-0 w-60 h-60 bg-blue-600/5 -mr-32 -mt-32 rounded-full group-hover:scale-150 transition-transform"></div>
+                  <div className="flex items-center gap-8 relative z-10">
+                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-900 flex items-center justify-center font-bold text-2xl text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 italic transition-all group-hover:bg-slate-900 dark:group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent">
+                       {selectedEmployee?.name.split(' ').map(n => n[0]).join('')}
+                    </div>
+                    <div>
+                      <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tighter uppercase italic group-hover:text-blue-600 transition-colors">{selectedEmployee?.name}</h3>
+                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 mt-2 uppercase tracking-[0.3em] italic">Bio-Sync eSocial Protocolo Ativo</p>
+                    </div>
+                  </div>
+                  
+                  <div className="flex gap-6 relative z-10">
+                    <button onClick={handleExport} disabled={isExporting} className="px-10 py-4 bg-slate-900 dark:bg-blue-600 text-white text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-blue-700 dark:hover:bg-blue-500 transition-all duration-500 shadow-2xl italic disabled:opacity-30">
+                      {isExporting ? 'Processando Audit...' : 'Gerar Cronograma'}
                     </button>
-                    <button onClick={handleSync} disabled={isSyncing} className="px-6 py-3 bg-gray-900 text-white rounded-xl text-[10px] font-black uppercase tracking-widest shadow-lg hover:bg-black transition-all disabled:opacity-50">
-                      {isSyncing ? 'Transmitindo...' : 'Sincronizar eSocial'}
+                    <button onClick={handleSync} disabled={isSyncing} className="px-10 py-4 border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-slate-100 dark:hover:bg-slate-900 transition-all italic disabled:opacity-30">
+                      {isSyncing ? 'Transmitindo...' : 'Flash eSocial'}
                     </button>
                   </div>
                </div>
 
-               <div className="space-y-6">
+                <div className="space-y-8">
                  {Object.entries(groupedRecords).map(([date, records]: [string, TimeRecord[]]) => (
-                    <div key={date} className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all group/day">
-                        <div className="flex justify-between items-center mb-6 border-b border-gray-50 pb-4">
-                          <div className="flex items-center gap-4">
-                              <span className="text-2xl font-black text-gray-900">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit', month: 'short' })}</span>
-                              <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long' })}</span>
+                    <div key={date} className="nexus-card p-10 group/day hover:shadow-2xl transition-all duration-700 overflow-hidden relative">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 dark:bg-slate-900/50 -mr-16 -mt-16 group-hover/day:bg-blue-600/5 transition-all"></div>
+                        <div className="flex justify-between items-center mb-10 border-b border-slate-100 dark:border-slate-800 pb-8 relative z-10">
+                          <div className="flex items-center gap-8">
+                              <div className="flex flex-col items-center p-4 bg-slate-900 dark:bg-blue-600 border border-slate-900 dark:border-blue-700 min-w-[80px] text-white shadow-xl italic">
+                                <span className="text-3xl font-black italic tracking-tighter">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit' })}</span>
+                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 opacity-60">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'short' })}</span>
+                              </div>
+                              <div>
+                                 <span className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-[0.3em] italic">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long' })}</span>
+                                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.3em] mt-2 italic border-l-2 border-blue-600 dark:border-blue-400 pl-4">Audit de Carga: 08:00h Nexus</p>
+                              </div>
                           </div>
-                          <div className="flex items-center gap-4">
-                            <div className="text-right">
-                              <p className="text-[8px] font-black text-gray-400 uppercase">Total do Dia</p>
-                              <p className="text-sm font-black text-indigo-600">08:00h</p>
-                            </div>
+                   
+                          <div className="text-right">
+                             <p className="text-[10px] font-bold text-slate-300 dark:text-slate-700 uppercase tracking-[0.3em] mb-2 italic">Diferencial Diário</p>
+                             <p className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums italic group-hover/day:text-blue-600 dark:group-hover/day:text-blue-400 transition-colors">00:00</p>
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
                           {[...records].sort((a,b) => a.timestamp.localeCompare(b.timestamp)).map(tr => (
-                            <div key={tr.id} className={`p-5 rounded-[2rem] border transition-all group/card relative ${
-                              tr.status === 'Rejeitado' ? 'bg-red-50 border-red-100' :
-                              tr.status === 'Abonado' ? 'bg-purple-50 border-purple-100' : 
-                              tr.status === 'Pendente' ? 'bg-amber-50 border-amber-200' : 'bg-gray-50 border-gray-100'
-                            }`}>
-                                <div className="flex justify-between items-start mb-3">
-                                  <span className={`text-[9px] font-black uppercase tracking-widest ${
-                                    tr.type === 'Entrada' ? 'text-green-600' : tr.type === 'Saída' ? 'text-red-600' : 'text-blue-600'
-                                  }`}>{tr.type}</span>
-                                  <button onClick={() => { setSelectedRecord(tr); setIsEditOpen(true); }} className="opacity-0 group-hover/card:opacity-100 text-indigo-600 p-1.5 hover:bg-white rounded-lg shadow-sm">
-                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
-                                  </button>
+                            <div key={tr.id} className="p-6 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 hover:border-blue-600 dark:hover:border-blue-500 transition-all duration-500 flex flex-col justify-between group/record">
+                                <div className="flex justify-between items-start mb-6">
+                                  <div className="flex flex-col">
+                                    <span className={`text-[9px] font-bold uppercase tracking-[0.2em] italic ${
+                                      tr.type === 'Entrada' ? 'text-emerald-500' : tr.type === 'Saída' ? 'text-red-500' : 'text-blue-500'
+                                    }`}>{tr.type}</span>
+                                    <span className="text-[7px] font-bold text-slate-400 dark:text-slate-700 uppercase mt-1">Status: OK</span>
+                                  </div>
+                                  <div className={`w-2 h-2 rounded-none transition-transform group-hover/record:rotate-45 ${
+                                    tr.type === 'Entrada' ? 'bg-emerald-500 shadow-[0_0_10px_rgba(16,185,129,0.5)]' : tr.type === 'Saída' ? 'bg-red-500 shadow-[0_0_10px_rgba(239,68,68,0.5)]' : 'bg-blue-500 shadow-[0_0_10px_rgba(59,130,246,0.5)]'
+                                  }`}></div>
                                 </div>
-                                <p className="text-2xl font-black text-gray-900 tabular-nums">{tr.timestamp}</p>
-                                <div className="mt-3 flex items-center justify-between">
-                                  <span className={`px-2 py-0.5 rounded-lg text-[8px] font-black uppercase border ${tr.status === 'Original' ? 'bg-white text-green-600 border-green-50' : 'bg-white text-blue-600 border-blue-50'}`}>{tr.status}</span>
+                                <p className="text-3xl font-black text-slate-900 dark:text-white tabular-nums italic tracking-tighter mb-4 group-hover/record:translate-x-1 transition-transform">{tr.timestamp}</p>
+                                <div className="flex items-center justify-between pt-6 border-t border-slate-200/50 dark:border-slate-800/50">
+                                   <span className="text-[8px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-widest italic">{tr.status}</span>
+                                   <button className="w-8 h-8 flex items-center justify-center text-slate-200 dark:text-slate-800 hover:text-blue-600 dark:hover:text-blue-500 transition-all hover:bg-white dark:hover:bg-slate-900 shadow-sm">
+                                      <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.232 5.232l3.536 3.536m-2.036-5.036a2.5 2.5 0 113.536 3.536L6.5 21.036H3v-3.572L16.732 3.732z" /></svg>
+                                   </button>
                                 </div>
                             </div>
                           ))}
@@ -257,27 +273,38 @@ const TimeTracking: React.FC = () => {
           )}
         </section>
 
-        <section className="space-y-8">
-           <div className="bg-gray-950 p-10 rounded-[4rem] text-white shadow-2xl relative overflow-hidden group">
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-10 pb-4 border-b border-white/10">Compliance Global</h4>
-              <div className="space-y-10">
-                 <div className="flex justify-between items-center group/item">
-                    <div>
-                       <p className="text-4xl font-black tabular-nums">100%</p>
-                       <p className="text-[10px] font-bold text-gray-500 uppercase tracking-widest mt-1">Sincronia S-1200</p>
+        <aside className="space-y-8 animate-slideLeft">
+           <div className="bg-slate-900 border border-slate-800 p-10 text-white shadow-2xl relative overflow-hidden group">
+              <div className="absolute top-0 right-0 w-80 h-80 bg-blue-600/10 -mr-40 -mt-40 rounded-full blur-3xl group-hover:bg-blue-600/20 transition-all duration-700"></div>
+              <h4 className="text-[11px] font-bold uppercase tracking-[0.4em] text-slate-500 mb-12 border-b border-white/10 pb-6 italic">Audit Benchmarking Nexus</h4>
+              
+              <div className="space-y-12 relative z-10">
+                 <div className="group/metric">
+                    <p className="text-6xl font-black italic tracking-tighter leading-none group-hover/metric:text-blue-500 transition-colors">100%</p>
+                    <p className="text-[10px] font-bold text-blue-400 uppercase tracking-[0.3em] mt-4 italic">Sincronia Estrutural eSocial</p>
+                 </div>
+
+                 <div className="p-8 bg-white/5 border-l-2 border-blue-600 italic text-[11px] text-slate-400 leading-relaxed font-bold tracking-tight">
+                    O Nexus Monitor validou toda a malha biométrica. <span className="text-white">Protocolo Safe-Active garantido</span> nas últimas submissões de dados.
+                 </div>
+                 
+                 <div className="grid grid-cols-2 gap-6">
+                    <div className="text-center p-6 bg-white/5 border border-white/5 hover:border-blue-600/30 transition-colors">
+                       <p className="text-2xl font-black italic tracking-tighter text-white">0.4%</p>
+                       <p className="text-[10px] font-bold text-slate-500 uppercase italic mt-1">Gaps RH</p>
                     </div>
-                    <div className="w-14 h-14 bg-green-500/10 rounded-2xl flex items-center justify-center text-green-500 border border-green-500/20">
-                       <svg className="w-7 h-7" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M9 12l2 2 4-4" /></svg>
+                    <div className="text-center p-6 bg-white/5 border border-white/5 hover:border-blue-600/30 transition-colors">
+                       <p className="text-2xl font-black italic tracking-tighter text-emerald-400">SAFE</p>
+                       <p className="text-[10px] font-bold text-slate-500 uppercase italic mt-1">Audit</p>
                     </div>
                  </div>
-                 <div className="p-6 bg-white/5 rounded-3xl border border-white/10">
-                    <p className="text-[10px] text-gray-400 italic font-medium leading-relaxed">
-                       A Nexus HR valida automaticamente a jornada contra a CLT. Alertas de horas extras acima de 2h/dia são priorizados para o gestor.
-                    </p>
-                 </div>
+
+                 <button className="w-full py-5 border border-white/10 hover:border-blue-600 text-[10px] font-bold uppercase tracking-[0.4em] italic hover:bg-blue-600 transition-all group/btn">
+                    Protocolo em Tempo Real
+                 </button>
               </div>
            </div>
-        </section>
+        </aside>
       </div>
 
       {showExportModal && selectedEmployee && (

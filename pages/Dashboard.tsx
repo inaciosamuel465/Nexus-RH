@@ -1,19 +1,21 @@
-
 import React, { useMemo } from 'react';
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, AreaChart, Area, PieChart, Pie, Cell } from 'recharts';
+import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useHR } from '../context/HRContext';
 
-const KPICard: React.FC<{ title: string; value: string | number; trend?: string; color: string; subtitle?: string }> = ({ title, value, trend, color, subtitle }) => (
-  <div className="bg-white p-6 md:p-8 rounded-[2rem] md:rounded-[2.5rem] shadow-sm border border-gray-100 transition-all hover:shadow-xl group">
-    <h3 className="text-[10px] font-black text-gray-400 uppercase tracking-widest mb-4">{title}</h3>
-    <div className="flex items-baseline gap-2 flex-wrap">
-      <span className="text-3xl md:text-4xl font-black text-gray-900 tracking-tighter italic">{value}</span>
-      {trend && <span className={`text-[9px] font-black px-2 py-0.5 rounded-full ${trend.startsWith('+') ? 'bg-red-50 text-red-600' : 'bg-green-50 text-green-600'}`}>{trend}</span>}
+const KPICard: React.FC<{ title: string; value: string | number; trend?: string; subtitle?: string }> = ({ title, value, trend, subtitle }) => (
+  <div className="nexus-card p-8 group hover:-translate-y-2 transition-all duration-500">
+    <div>
+      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.3em] mb-4 italic border-b border-slate-50 dark:border-slate-800 pb-2">{title}</p>
+      <div className="flex items-baseline gap-3">
+        <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter italic">{value}</span>
+        {trend && (
+          <span className={`text-[11px] font-black italic ${trend.startsWith('+') ? 'text-blue-600 dark:text-blue-400' : 'text-emerald-500 dark:text-emerald-400'}`}>
+            {trend}
+          </span>
+        )}
+      </div>
     </div>
-    {subtitle && <p className="text-[9px] md:text-[10px] font-bold text-gray-500 mt-1 uppercase tracking-tighter">{subtitle}</p>}
-    <div className="mt-6 h-1 w-full bg-gray-50 rounded-full overflow-hidden">
-      <div className={`h-full ${color} transition-all duration-1000`} style={{ width: '70%' }}></div>
-    </div>
+    {subtitle && <p className="text-[9px] text-slate-500 dark:text-slate-700 mt-6 font-bold uppercase tracking-[0.2em] italic">{subtitle}</p>}
   </div>
 );
 
@@ -33,76 +35,105 @@ const Dashboard: React.FC = () => {
     return Object.entries(counts).map(([name, value]) => ({ name, value }));
   }, [employees]);
 
-  const COLORS = ['#4F46E5', '#10B981', '#F59E0B', '#EF4444', '#8B5CF6', '#EC4899'];
+  const COLORS = ['#2563eb', '#1e293b', '#64748b', '#94a3b8', '#cbd5e1'];
 
   return (
-    <div className="space-y-6 md:space-y-10 animate-fadeIn pb-12">
-      <header className="flex flex-col xl:flex-row justify-between items-start xl:items-center gap-6 bg-white p-6 md:p-10 rounded-[2rem] md:rounded-[3rem] border border-gray-100 shadow-sm">
-        <div className="flex items-center gap-4 md:gap-6">
-          <div className="w-12 h-12 md:w-16 md:h-16 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-2xl md:rounded-3xl flex items-center justify-center text-white shadow-xl">
-             <svg className="w-6 h-6 md:w-8 md:h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6" /></svg>
-          </div>
-          <div>
-            <h2 className="text-2xl md:text-4xl font-black text-gray-900 tracking-tighter italic uppercase leading-none">Estratégia Nexus</h2>
-            <p className="text-xs md:text-sm text-gray-500 font-medium mt-1">BI e Análise de Capital Humano.</p>
-          </div>
-        </div>
-        <div className="flex bg-gray-100 p-1 rounded-xl w-full xl:w-auto">
-          <button className="flex-1 px-4 md:px-6 py-3 bg-white text-indigo-600 rounded-lg text-[9px] font-black uppercase tracking-widest shadow-sm">Geral</button>
-          <button className="flex-1 px-4 md:px-6 py-3 text-gray-400 rounded-lg text-[9px] font-black uppercase tracking-widest">Equipe</button>
-        </div>
-      </header>
-
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
-        <KPICard title="Headcount" value={metrics.total} trend="+12%" color="bg-indigo-600" subtitle={`${metrics.activeCount} Ativos`} />
-        <KPICard title="Turnover" value={`${metrics.turnover}%`} trend="-0.4%" color="bg-emerald-500" subtitle="Rotatividade" />
-        <KPICard title="Folha" value={`R$ ${(metrics.totalPayroll / 1000).toFixed(0)}k`} trend="+5%" color="bg-indigo-900" subtitle="Desembolso" />
-        <KPICard title="Absenteísmo" value={`${metrics.absentRate}%`} trend="+0.2%" color="bg-orange-500" subtitle="Frequência" />
+    <div className="space-y-8 animate-fadeIn pb-20">
+      <div className="bg-slate-900 border border-slate-200 dark:border-slate-800 relative min-h-[260px] flex items-center px-12 overflow-hidden shadow-2xl">
+         <img 
+            src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200" 
+            className="absolute inset-0 w-full h-full object-cover opacity-10 grayscale"
+            alt="Office"
+         />
+         <div className="relative z-10 max-w-3xl animate-slideDown">
+            <h1 className="text-5xl font-black text-white tracking-tighter italic uppercase mb-4 leading-none">Capital Intellect</h1>
+            <p className="text-slate-400 text-sm font-bold leading-relaxed italic max-w-xl uppercase tracking-widest opacity-80">
+               Navegação analítica da rede neural corporativa. Telemetria de KPIs, evolução financeira e pulso organizacional em tempo real.
+            </p>
+         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-10">
-        <div className="lg:col-span-2 bg-white p-6 md:p-10 rounded-[2.5rem] md:rounded-[4rem] shadow-sm border border-gray-100">
-          <h3 className="text-lg md:text-xl font-black text-gray-900 uppercase tracking-tighter italic mb-8">Evolução de Custos</h3>
-          <div className="h-64 md:h-80">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+        <KPICard title="Headcount Global" value={metrics.total} trend="+12" subtitle="Ingressos Sincronizados" />
+        <KPICard title="Retenção (Stasis)" value={`${metrics.turnover}%`} trend="-0.4" subtitle="Fluxo de Estabilidade" />
+        <KPICard title="Provisão Mensal" value={`R$ ${(metrics.totalPayroll / 1000).toFixed(0)}k`} trend="+5%" subtitle="Impacto On-Chain" />
+        <KPICard title="Bio-Absenteísmo" value={`${metrics.absentRate}%`} trend="+0.2" subtitle="Nível de Presença" />
+      </div>
+
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className="lg:col-span-2 nexus-card p-12 flex flex-col relative overflow-hidden group">
+          <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 -mr-32 -mt-32 rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
+          <div className="flex items-center justify-between mb-16 relative z-10">
+             <div className="flex items-center gap-6">
+                <div className="w-3 h-3 bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>
+                <h3 className="text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-[0.4em] italic">Telemetria de Fluxo Financeiro</h3>
+             </div>
+             <div className="flex items-center gap-8 text-[9px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.3em] italic">
+                <span className="flex items-center gap-3"><div className="w-2.5 h-2.5 bg-blue-600"></div> Realizado</span>
+                <span className="flex items-center gap-3"><div className="w-2.5 h-2.5 bg-slate-100 dark:bg-slate-800"></div> Projeção Nexus</span>
+             </div>
+          </div>
+          <div className="h-96 flex-1 relative z-10">
             <ResponsiveContainer width="100%" height="100%">
               <AreaChart data={[
                 { m: 'Jan', v: 42000 }, { m: 'Fev', v: 45000 }, { m: 'Mar', v: 48000 },
                 { m: 'Abr', v: 47000 }, { m: 'Mai', v: 52000 }, { m: 'Jun', v: metrics.totalPayroll }
               ]}>
-                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
-                <XAxis dataKey="m" axisLine={false} tickLine={false} tick={{fill: '#94A3B8', fontSize: 10, fontWeight: 'bold'}} />
-                <Tooltip contentStyle={{ borderRadius: '20px', border: 'none', boxShadow: '0 10px 15px -3px rgb(0 0 0 / 0.1)' }} />
-                <Area type="monotone" dataKey="v" stroke="#4F46E5" strokeWidth={3} fill="#4F46E520" />
+                <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#f1f5f9" className="dark:opacity-5" />
+                <XAxis dataKey="m" axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: '900', letterSpacing: '0.1em'}} dy={15} />
+                <YAxis axisLine={false} tickLine={false} tick={{fill: '#94a3b8', fontSize: 10, fontWeight: '900'}} dx={-15} />
+                <Tooltip 
+                   contentStyle={{ backgroundColor: '#0f172a', border: 'none', borderRadius: '0px', padding: '16px', boxShadow: '0 20px 50px rgba(0,0,0,0.5)' }}
+                   labelStyle={{ fontWeight: '900', fontSize: '9px', textTransform: 'uppercase', letterSpacing: '0.3em', marginBottom: '10px', color: '#64748b', fontStyle: 'italic' }}
+                   itemStyle={{ color: '#fff', fontWeight: '900', fontSize: '14px', letterSpacing: '-0.02em', fontStyle: 'italic' }}
+                   cursor={{ stroke: '#2563eb', strokeWidth: 1 }}
+                />
+                <Area type="monotone" dataKey="v" stroke="#2563eb" strokeWidth={5} fillOpacity={0.1} fill="#2563eb" />
               </AreaChart>
             </ResponsiveContainer>
           </div>
         </div>
 
-        <div className="bg-gray-950 p-8 md:p-10 rounded-[2.5rem] md:rounded-[4rem] text-white flex flex-col justify-between shadow-2xl relative overflow-hidden">
-           <div>
-              <h4 className="text-[10px] font-black uppercase tracking-widest text-indigo-400 mb-2 italic">Força de Trabalho</h4>
-              <p className="text-gray-500 text-[10px] font-medium">Por departamento estratégico.</p>
-           </div>
-           <div className="h-48 md:h-56 flex items-center justify-center">
-              <ResponsiveContainer width="100%" height="100%">
-                 <PieChart>
-                    <Pie data={departmentData} cx="50%" cy="50%" innerRadius={50} outerRadius={75} paddingAngle={5} dataKey="value">
-                       {departmentData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
-                    </Pie>
-                 </PieChart>
-              </ResponsiveContainer>
-           </div>
-           <div className="space-y-2 mt-4">
-              {departmentData.map((d, i) => (
-                <div key={d.name} className="flex items-center justify-between text-[9px] font-black uppercase tracking-tighter">
-                   <div className="flex items-center gap-2">
-                      <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
-                      <span className="text-gray-300 truncate max-w-[120px]">{d.name}</span>
+        <div className="nexus-card p-12 flex flex-col h-[580px] relative overflow-hidden group">
+          <div className="absolute bottom-0 left-0 w-48 h-48 bg-slate-100 dark:bg-slate-900 -ml-24 -mb-24 rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
+          <div className="flex items-center gap-6 border-b border-slate-50 dark:border-slate-800 pb-6 mb-10 relative z-10">
+             <div className="w-3 h-3 bg-slate-900 dark:bg-white shadow-[0_0_10px_rgba(0,0,0,0.3)]"></div>
+             <h3 className="text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-[0.4em] italic">Arquitetura de Unidades</h3>
+          </div>
+          <div className="h-72 flex items-center justify-center relative z-10">
+             <ResponsiveContainer width="100%" height="100%">
+                <PieChart>
+                   <Pie 
+                     data={departmentData} 
+                     cx="50%" 
+                     cy="50%" 
+                     innerRadius={80} 
+                     outerRadius={105} 
+                     paddingAngle={4} 
+                     dataKey="value"
+                     stroke="transparent"
+                   >
+                      {departmentData.map((_, i) => <Cell key={i} fill={COLORS[i % COLORS.length]} />)}
+                   </Pie>
+                   <Tooltip />
+                </PieChart>
+             </ResponsiveContainer>
+             <div className="absolute inset-0 flex flex-col items-center justify-center pointer-events-none">
+                <span className="text-5xl font-black text-slate-900 dark:text-white tracking-tighter italic leading-none">{metrics.total}</span>
+                <span className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.4em] italic mt-2">Entities</span>
+             </div>
+          </div>
+          <div className="mt-12 space-y-6 flex-1 overflow-y-auto pr-4 custom-scrollbar border-t border-slate-50 dark:border-slate-800 pt-8 relative z-10">
+             {departmentData.map((d, i) => (
+                <div key={d.name} className="flex items-center justify-between text-[10px] font-bold uppercase tracking-[0.3em] text-slate-500 dark:text-slate-700 italic group cursor-default hover:translate-x-3 transition-transform duration-500">
+                   <div className="flex items-center gap-4">
+                      <div className="w-3 h-3 shadow-lg" style={{ backgroundColor: COLORS[i % COLORS.length] }}></div>
+                      <span className="truncate max-w-[160px] group-hover:text-slate-900 dark:group-hover:text-white transition-colors uppercase tracking-[0.2em]">{d.name}</span>
                    </div>
-                   <span>{d.value}</span>
+                   <span className="text-slate-900 dark:text-white font-black italic">{d.value}</span>
                 </div>
-              ))}
-           </div>
+             ))}
+          </div>
         </div>
       </div>
     </div>

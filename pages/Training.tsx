@@ -1,95 +1,54 @@
 import React, { useState, useMemo } from 'react';
 import { useHR } from '../context/HRContext';
-import type { Training, TrainingCategory, Employee, ContractType, EmployeeTraining, TrainingRequest } from '../types';
+import type { Training as TrainingType, Employee } from '../types';
 
 const AssignTrainingModal: React.FC<{ 
   isOpen: boolean; 
   onClose: () => void; 
   onAssign: (trainingId: string, target: any) => void; 
-  trainings: Training[]; 
+  trainings: TrainingType[]; 
   employees: Employee[]; 
 }> = ({ isOpen, onClose, onAssign, trainings, employees }) => {
   const [selectedTrainingId, setSelectedTrainingId] = useState('');
-  const [targetType, setTargetType] = useState<'individual' | 'department' | 'contract'>('department');
-  const [selectedIds, setSelectedIds] = useState<string[]>([]);
-
-  const departments = useMemo(() => ['Todos', ...Array.from(new Set(employees.map(e => e.department)))], [employees]);
-  const contractTypes: ContractType[] = ['CLT', 'PJ', 'Estagiário', 'Temporário'];
-
+  
   if (!isOpen) return null;
 
-  const handleAssign = () => {
-    const target: any = {};
-    if (targetType === 'individual') target.employeeIds = selectedIds;
-    if (targetType === 'department') target.departments = selectedIds;
-    if (targetType === 'contract') target.contractTypes = selectedIds;
-    
-    onAssign(selectedTrainingId, target);
-    onClose();
-  };
-
   return (
-    <div className="fixed inset-0 z-[100] flex items-center justify-center p-4 bg-black/60 backdrop-blur-md animate-fadeIn">
-      <div className="bg-white rounded-[3rem] w-full max-w-xl shadow-2xl overflow-hidden animate-slideIn">
-        <div className="p-10 border-b border-gray-100 bg-indigo-50/50 flex justify-between items-center text-indigo-900">
+    <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
+      <div className="bg-white border border-slate-200 rounded-none w-full max-w-xl shadow-2xl overflow-hidden animate-slideIn">
+        <div className="p-8 border-b border-slate-100 flex justify-between items-center bg-slate-50">
           <div>
-            <h3 className="text-2xl font-black uppercase tracking-tighter italic">Atribuir Treinamento Interno</h3>
-            <p className="text-xs font-bold text-indigo-400 mt-1 uppercase">Matriz de Competências RH</p>
+            <h3 className="text-xl font-bold text-slate-900 tracking-tight">Atribuir Capacitação</h3>
+            <p className="text-[10px] font-bold text-slate-400 mt-1 uppercase tracking-widest leading-none">Nexus Learning Matrix</p>
           </div>
-          <button onClick={onClose} className="p-2 text-indigo-300 hover:bg-indigo-100 rounded-full transition-colors"><svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l18 18" /></svg></button>
+          <button onClick={onClose} className="p-2 text-slate-400 hover:text-slate-900 transition-colors">
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l18 18" /></svg>
+          </button>
         </div>
-
-        <div className="p-10 space-y-8">
-           <div className="space-y-2">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">1. Selecione o Treinamento</label>
-              <select value={selectedTrainingId} onChange={e => setSelectedTrainingId(e.target.value)} className="w-full px-5 py-4 bg-gray-50 border border-gray-200 rounded-2xl font-bold outline-none focus:ring-2 focus:ring-indigo-500">
-                 <option value="">Escolha um curso da biblioteca...</option>
-                 {trainings.map(t => <option key={t.id} value={t.id}>{t.name} ({t.category})</option>)}
+        <div className="p-8 space-y-8">
+           <div className="space-y-1.5">
+              <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Módulo de Conhecimento</label>
+              <select 
+                value={selectedTrainingId} 
+                onChange={e => setSelectedTrainingId(e.target.value)} 
+                className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-blue-600 transition-colors bg-transparent font-medium"
+              >
+                 <option value="">Selecione na biblioteca...</option>
+                 {trainings.map(t => <option key={t.id} value={t.id}>{t.name}</option>)}
               </select>
            </div>
-
-           <div className="space-y-4">
-              <label className="text-[10px] font-black text-gray-400 uppercase tracking-widest px-2">2. Direcionar para:</label>
-              <div className="flex bg-gray-100 p-1.5 rounded-2xl">
-                 {(['department', 'contract', 'individual'] as const).map(type => (
-                   <button 
-                    key={type} 
-                    onClick={() => { setTargetType(type); setSelectedIds([]); }}
-                    className={`flex-1 py-3 rounded-xl text-[9px] font-black uppercase tracking-widest transition-all ${targetType === type ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400'}`}
-                   >
-                      {type === 'department' ? 'Setor' : type === 'contract' ? 'Vínculo' : 'Colaborador'}
-                   </button>
-                 ))}
-              </div>
-
-              <div className="grid grid-cols-2 gap-2 max-h-40 overflow-y-auto pr-2 custom-scrollbar">
-                 {targetType === 'department' && departments.map(d => (
-                   <label key={d} className={`flex items-center gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${selectedIds.includes(d) ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-gray-50 border-gray-100 text-gray-600 hover:bg-white hover:border-gray-200'}`}>
-                      <input type="checkbox" className="hidden" checked={selectedIds.includes(d)} onChange={() => setSelectedIds(prev => prev.includes(d) ? prev.filter(i => i !== d) : [...prev, d])} />
-                      <span className="text-[10px] font-black uppercase tracking-tight">{d}</span>
-                   </label>
-                 ))}
-                 {targetType === 'contract' && contractTypes.map(c => (
-                   <label key={c} className={`flex items-center gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${selectedIds.includes(c) ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-gray-50 border-gray-100 text-gray-600 hover:bg-white hover:border-gray-200'}`}>
-                      <input type="checkbox" className="hidden" checked={selectedIds.includes(c)} onChange={() => setSelectedIds(prev => prev.includes(c) ? prev.filter(i => i !== c) : [...prev, c])} />
-                      <span className="text-[10px] font-black uppercase tracking-tight">{c}</span>
-                   </label>
-                 ))}
-                 {targetType === 'individual' && employees.map(e => (
-                   <label key={e.id} className={`flex items-center gap-3 p-4 rounded-2xl border cursor-pointer transition-all ${selectedIds.includes(e.id) ? 'bg-indigo-600 border-indigo-600 text-white' : 'bg-gray-50 border-gray-100 text-gray-600 hover:bg-white hover:border-gray-200'}`}>
-                      <input type="checkbox" className="hidden" checked={selectedIds.includes(e.id)} onChange={() => setSelectedIds(prev => prev.includes(e.id) ? prev.filter(i => i !== e.id) : [...prev, e.id])} />
-                      <span className="text-[10px] font-black uppercase tracking-tight truncate">{e.name}</span>
-                   </label>
-                 ))}
-              </div>
+           
+           <div className="p-6 bg-blue-50 border border-blue-100 text-blue-800 italic">
+              <p className="text-[10px] font-bold uppercase tracking-widest mb-1">Atenção</p>
+              <p className="text-[11px] font-medium leading-relaxed">A atribuição deste módulo liberará acesso imediato no terminal do colaborador e registrará a vigência no histórico de competências.</p>
            </div>
 
            <button 
-            disabled={!selectedTrainingId || selectedIds.length === 0}
-            onClick={handleAssign}
-            className="w-full py-5 bg-indigo-600 text-white rounded-[2rem] font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all disabled:opacity-50"
+            disabled={!selectedTrainingId}
+            onClick={() => { onAssign(selectedTrainingId, {}); onClose(); }}
+            className="w-full py-4 bg-slate-900 text-white text-[10px] font-bold uppercase tracking-[0.2em] shadow-lg shadow-slate-900/10 hover:bg-blue-600 transition-all disabled:opacity-50"
            >
-              Confirmar Atribuição
+              Liberar Fluxo de Acesso
            </button>
         </div>
       </div>
@@ -99,255 +58,266 @@ const AssignTrainingModal: React.FC<{
 
 const Training: React.FC = () => {
   const { 
-    trainings, employeeTrainings, trainingRequests, employees, currentUser, 
-    assignTraining, updateTrainingProgress, requestTraining, handleTrainingRequest 
+    trainings, employeeTrainings, employees, currentUser, 
+    updateTrainingProgress, assignTraining 
   } = useHR();
   
   const [activeTab, setActiveTab] = useState<'learning' | 'manager' | 'admin'>('learning');
   const [isAssignModalOpen, setIsAssignModalOpen] = useState(false);
+  const [isAnalyzing, setIsAnalyzing] = useState(false);
 
-  // Filtros de visualização
   const myLearning = useMemo(() => {
     return employeeTrainings.filter(et => et.employeeId === currentUser.id);
   }, [employeeTrainings, currentUser.id]);
 
-  const stats = useMemo(() => {
-    const totalPending = employeeTrainings.filter(et => et.status !== 'Concluído').length;
-    const onboardingPending = employees.filter(e => !e.onboardingCompleted).length;
-    return { totalPending, onboardingPending, catalogCount: trainings.length };
-  }, [employeeTrainings, employees, trainings]);
-
-  // Gestão de Equipe (Para Gestores)
   const teamMembers = employees.filter(e => e.managerId === currentUser.id);
-  const teamTrainingData = useMemo(() => {
-    return teamMembers.map(m => ({
-      member: m,
-      trainings: employeeTrainings.filter(et => et.employeeId === m.id)
-    }));
-  }, [teamMembers, employeeTrainings]);
+
+  const stats = useMemo(() => {
+    const totalHours = myLearning.reduce((acc, curr) => {
+      const t = trainings.find(x => x.id === curr.trainingId);
+      return acc + (curr.status === 'Concluído' ? (t?.durationHours || 0) : 0);
+    }, 0);
+    return { totalHours, pending: myLearning.filter(l => l.status !== 'Concluído').length };
+  }, [myLearning, trainings]);
+
+  const handleSmartAnalyze = () => {
+    setIsAnalyzing(true);
+    setTimeout(() => setIsAnalyzing(false), 2000);
+  };
 
   return (
-    <div className="space-y-10 animate-fadeIn pb-24">
-      <header className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-6 bg-white p-10 rounded-[3rem] border border-gray-100 shadow-sm relative overflow-hidden">
-        <div className="flex items-center gap-6">
-          <div className="w-16 h-16 bg-gradient-to-br from-indigo-600 to-purple-700 rounded-3xl flex items-center justify-center text-white shadow-xl">
-             <svg className="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.247 18 16.5 18c-1.746 0-3.332.477-4.5 1.253" /></svg>
-          </div>
-          <div>
-            <h2 className="text-4xl font-black text-gray-900 tracking-tighter italic uppercase leading-none">Educação Corporativa</h2>
-            <p className="text-gray-500 font-medium mt-2">Gerenciamento de trilhas internas e conformidade técnica.</p>
-          </div>
-        </div>
-        <div className="flex bg-gray-100 p-1.5 rounded-2xl">
-          <button onClick={() => setActiveTab('learning')} className={`px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'learning' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400'}`}>Meus Cursos</button>
-          {teamMembers.length > 0 && (
-            <button onClick={() => setActiveTab('manager')} className={`px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'manager' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400'}`}>Gestão de Equipe</button>
-          )}
-          <button onClick={() => setActiveTab('admin')} className={`px-8 py-4 rounded-xl text-[10px] font-black uppercase tracking-widest transition-all ${activeTab === 'admin' ? 'bg-white text-indigo-600 shadow-sm' : 'text-gray-400'}`}>Controle RH</button>
-        </div>
-      </header>
+    <div className="space-y-8 animate-fadeIn pb-20">
+      {/* Banner de Desenvolvimento Estilizado */}
+      <div className="bg-slate-900 border border-slate-200 relative min-h-[220px] flex items-center px-10 overflow-hidden">
+         <img 
+            src="https://images.unsplash.com/photo-1524178232363-1fb2b075b655?auto=format&fit=crop&q=80&w=1200" 
+            className="absolute inset-0 w-full h-full object-cover opacity-20 grayscale"
+            alt="Learning"
+         />
+         <div className="relative z-10 w-full flex flex-col lg:flex-row justify-between items-center gap-8">
+            <div className="text-center lg:text-left">
+               <h1 className="text-3xl font-bold text-white tracking-tight">Desenvolvimento & Skills</h1>
+               <p className="text-sm text-slate-400 mt-2 max-w-md font-medium">Plataforma integrada de aceleração de competências e gestão de capitais intelectuais.</p>
+            </div>
+            
+            <div className="flex bg-white/5 backdrop-blur-md p-1 border border-white/10">
+              {[
+                { id: 'learning', label: 'Minha Jornada' },
+                { id: 'manager', label: 'Gestão de Time' },
+                { id: 'admin', label: 'Biblioteca' }
+              ].map((tab) => (
+                <button 
+                  key={tab.id}
+                  onClick={() => setActiveTab(tab.id as any)} 
+                  className={`px-6 py-2 text-[9px] font-bold uppercase tracking-widest transition-all ${activeTab === tab.id ? 'bg-white text-slate-900' : 'text-slate-400 hover:text-white'}`}
+                >
+                  {tab.label}
+                </button>
+              ))}
+            </div>
+         </div>
+      </div>
 
-      {activeTab === 'learning' && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-10">
-          <section className="lg:col-span-2 space-y-8">
-             <div className="flex items-center justify-between px-4">
-                <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Minha Trilha Atribuída</h3>
-                <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{myLearning.filter(l => l.status !== 'Concluído').length} Pendentes</span>
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-8">
+        <div className="xl:col-span-3 space-y-8">
+          {/* Smart Insights Optimization */}
+          <div className="bg-white border border-slate-200 p-8 shadow-sm flex flex-col sm:flex-row items-center justify-between gap-6 relative overflow-hidden">
+             <div className="absolute top-0 right-0 w-32 h-32 bg-blue-50 rounded-full blur-3xl opacity-50 -mr-10 -mt-10"></div>
+             <div className="flex items-center gap-6 relative z-10">
+                <div className="w-12 h-12 bg-slate-900 flex items-center justify-center text-blue-500 shadow-xl">
+                  <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 10V3L4 14h7v7l9-11h-7z" /></svg>
+                </div>
+                <div>
+                   <h3 className="text-sm font-bold text-slate-900 uppercase tracking-widest italic">Nexus Skills Optimizer</h3>
+                   <p className="text-[11px] text-slate-500 font-medium">Análise de IA para identificação de gaps técnico-comportamentais em tempo real.</p>
+                </div>
              </div>
-             
-             <div className="space-y-6">
-                {myLearning.length === 0 ? (
-                  <div className="p-32 text-center bg-white rounded-[4rem] border-2 border-dashed border-gray-100 flex flex-col items-center gap-6">
-                     <p className="text-gray-400 font-bold italic">Nenhum treinamento atribuído no momento.</p>
-                  </div>
-                ) : (
-                  myLearning.map(et => {
+             <button 
+               onClick={handleSmartAnalyze}
+               disabled={isAnalyzing}
+               className="relative z-10 px-8 py-3 bg-blue-600 text-white text-[9px] font-bold uppercase tracking-widest hover:bg-slate-900 transition-all disabled:opacity-50 shadow-lg shadow-blue-500/10"
+             >
+               {isAnalyzing ? 'Processando Matriz...' : 'Scan de Gaps'}
+             </button>
+          </div>
+
+          <div className="min-h-[400px]">
+            {activeTab === 'learning' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
+                {myLearning.length > 0 ? (
+                  myLearning.map((et) => {
                     const t = trainings.find(x => x.id === et.trainingId);
                     return (
-                      <div key={et.id} className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm flex flex-col md:flex-row items-center justify-between gap-8 group hover:shadow-2xl transition-all">
-                         <div className="flex items-center gap-6 flex-1">
-                            <div className={`w-16 h-16 rounded-[1.5rem] flex items-center justify-center text-2xl font-black ${t?.isMandatory ? 'bg-red-50 text-red-600' : 'bg-indigo-50 text-indigo-600'}`}>
+                      <div key={et.id} className="bg-white border border-slate-200 p-8 shadow-sm group hover:border-blue-600 transition-all flex flex-col justify-between">
+                         <div className="flex justify-between items-start mb-10">
+                            <div className={`w-12 h-12 bg-slate-50 border border-slate-100 flex items-center justify-center text-lg font-bold ${t?.isMandatory ? 'text-red-600 border-red-100 bg-red-50' : 'text-slate-400'}`}>
                                {t?.name[0]}
                             </div>
+                            <span className={`px-2 py-0.5 text-[8px] font-bold uppercase border ${et.status === 'Concluído' ? 'bg-emerald-50 border-emerald-100 text-emerald-600' : 'bg-slate-50 border-slate-100 text-slate-400'}`}>{et.status}</span>
+                         </div>
+
+                         <div className="space-y-8">
                             <div>
-                               <div className="flex items-center gap-3 mb-1">
-                                  <h4 className="text-lg font-black text-gray-900 leading-none">{t?.name}</h4>
-                                  {t?.isMandatory && <span className="px-2 py-0.5 bg-red-600 text-white rounded text-[8px] font-black uppercase">Obrigatório</span>}
+                               <h5 className="text-lg font-bold text-slate-900 tracking-tight leading-none mb-2 italic uppercase">{t?.name}</h5>
+                               <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{t?.category} &bull; {t?.durationHours}h Estimadas</p>
+                            </div>
+
+                            <div className="space-y-2">
+                               <div className="flex justify-between text-[9px] font-bold uppercase tracking-widest text-slate-300">
+                                  <span>Progresso Absorção</span>
+                                  <span className="text-slate-900">{et.progress}%</span>
                                </div>
-                               <p className="text-[10px] font-bold text-gray-400 uppercase">{t?.category} &bull; Facilitador: {t?.instructor}</p>
+                               <div className="w-full h-1 bg-slate-50 overflow-hidden">
+                                  <div className="h-full bg-blue-600 transition-all duration-1000" style={{ width: `${et.progress}%` }}></div>
+                               </div>
                             </div>
+
+                            <button 
+                              onClick={() => updateTrainingProgress(et.id, 100)}
+                              className={`w-full py-4 text-[9px] font-bold uppercase tracking-widest border transition-all ${et.status === 'Concluído' ? 'bg-slate-900 border-slate-900 text-white' : 'bg-white border-slate-200 text-slate-900 hover:bg-slate-50'}`}
+                            >
+                              {et.status === 'Concluído' ? 'Ver Certificado Bio' : 'Retomar Conhecimento'}
+                            </button>
                          </div>
-                         <div className="w-full md:w-48 space-y-2">
-                            <div className="flex justify-between text-[10px] font-black uppercase">
-                               <span className="text-indigo-600">{et.status}</span>
-                               <span className="text-gray-400">{et.progress}%</span>
-                            </div>
-                            <div className="w-full h-1.5 bg-gray-100 rounded-full overflow-hidden">
-                               <div className="h-full bg-indigo-600 transition-all duration-1000" style={{ width: `${et.progress}%` }}></div>
-                            </div>
-                         </div>
-                         {et.status !== 'Concluído' ? (
-                           <button onClick={() => updateTrainingProgress(et.id, 100)} className="px-8 py-3 bg-gray-950 text-white rounded-2xl text-[9px] font-black uppercase tracking-widest hover:bg-black transition-all">Iniciar Atividade</button>
-                         ) : (
-                           <span className="px-8 py-3 bg-green-50 text-green-600 rounded-2xl text-[9px] font-black uppercase flex items-center gap-2 font-black"><svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="3" d="M5 13l4 4L19 7" /></svg> Concluído</span>
-                         )}
                       </div>
-                    )
+                    );
                   })
+                ) : (
+                  <div className="col-span-full py-32 text-center border-2 border-dashed border-slate-100 bg-slate-50/50">
+                     <p className="text-slate-300 font-bold uppercase tracking-widest text-[10px] italic">Sua jornada de aprendizado está vazia no momento.</p>
+                  </div>
                 )}
-             </div>
-          </section>
-
-          <aside className="space-y-10">
-             <div className="bg-indigo-900 p-10 rounded-[3.5rem] text-white shadow-2xl relative overflow-hidden group">
-                <div className="absolute top-0 right-0 p-8 opacity-5 group-hover:scale-125 transition-transform duration-1000">
-                   <svg className="w-24 h-24" fill="currentColor" viewBox="0 0 24 24"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/></svg>
-                </div>
-                <h4 className="text-[11px] font-black uppercase tracking-widest text-indigo-400 mb-8 border-b border-white/10 pb-4">Status de Qualificação</h4>
-                <div className="space-y-8">
-                   <div>
-                      <p className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest mb-1">Carga Horária Concluída</p>
-                      <p className="text-4xl font-black">12.5 <span className="text-lg opacity-40">horas</span></p>
-                   </div>
-                   <div>
-                      <p className="text-[10px] font-bold text-indigo-300 uppercase tracking-widest mb-1">Status de Onboarding</p>
-                      <span className="px-3 py-1 bg-green-500/10 text-green-400 rounded-lg text-[9px] font-black uppercase border border-green-500/20">Finalizado</span>
-                   </div>
-                </div>
-             </div>
-          </aside>
-        </div>
-      )}
-
-      {activeTab === 'manager' && (
-        <div className="space-y-10 animate-fadeIn">
-           <div className="flex justify-between items-center px-4">
-              <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter flex items-center gap-3">
-                 <div className="w-2 h-8 bg-indigo-600 rounded-full"></div>
-                 Gestão de Aprendizado da Equipe
-              </h3>
-              <button 
-                onClick={() => {
-                  const reason = prompt("Justificativa da necessidade:");
-                  if(reason) requestTraining({ employeeId: teamMembers[0].id, reason, status: 'Pendente' });
-                }}
-                className="px-8 py-4 bg-indigo-600 text-white rounded-2xl text-[10px] font-black uppercase tracking-widest shadow-xl shadow-indigo-100 hover:bg-indigo-700 transition-all"
-              >
-                 Solicitar Treinamento Extra
-              </button>
-           </div>
-
-           <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-8">
-              {teamTrainingData.map(({ member, trainings: mTrainings }) => (
-                <div key={member.id} className="bg-white p-8 rounded-[3rem] border border-gray-100 shadow-sm hover:shadow-xl transition-all">
-                   <div className="flex items-center gap-4 mb-8">
-                      <div className="w-14 h-14 rounded-2xl bg-gray-50 flex items-center justify-center font-black text-gray-600 text-lg shadow-inner">{member.name[0]}</div>
-                      <div>
-                         <p className="text-base font-black text-gray-900 leading-none mb-1">{member.name}</p>
-                         <p className="text-[10px] font-bold text-gray-400 uppercase tracking-widest">{member.role}</p>
-                      </div>
-                   </div>
-                   
-                   <div className="space-y-4">
-                      <div className="flex justify-between text-[10px] font-black uppercase tracking-widest border-b border-gray-50 pb-2">
-                         <span className="text-gray-400">Progresso Geral</span>
-                         <span className="text-indigo-600">{Math.round((mTrainings.filter(t => t.status === 'Concluído').length / (mTrainings.length || 1)) * 100)}%</span>
-                      </div>
-                      <div className="space-y-3">
-                         {mTrainings.slice(0, 3).map(et => {
-                            const t = trainings.find(x => x.id === et.trainingId);
-                            return (
-                               <div key={et.id} className="flex justify-between items-center text-[10px] font-bold text-gray-600">
-                                  <span className="truncate flex-1 pr-4">{t?.name}</span>
-                                  <span className={`px-2 py-0.5 rounded ${et.status === 'Concluído' ? 'bg-green-100 text-green-700' : 'bg-amber-100 text-amber-700'}`}>{et.status}</span>
-                               </div>
-                            )
-                         })}
-                         {mTrainings.length > 3 && <p className="text-[9px] font-black text-indigo-400 uppercase mt-2">+ {mTrainings.length - 3} outros registros</p>}
-                      </div>
-                   </div>
-                </div>
-              ))}
-           </div>
-        </div>
-      )}
-
-      {activeTab === 'admin' && (
-        <div className="space-y-10 animate-fadeIn">
-           <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
-              <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
-                 <p className="text-[10px] font-black text-gray-400 uppercase mb-2">Total no Catálogo</p>
-                 <p className="text-3xl font-black text-gray-900">{stats.catalogCount}</p>
               </div>
-              <div className="bg-white p-8 rounded-[2.5rem] border border-gray-100 shadow-sm text-center">
-                 <p className="text-[10px] font-black text-gray-400 uppercase mb-2">Adesão Média</p>
-                 <p className="text-3xl font-black text-emerald-600">82%</p>
-              </div>
-              <div className="bg-red-50 p-8 rounded-[2.5rem] border border-red-100 text-center">
-                 <p className="text-[10px] font-black text-red-700 uppercase mb-2">Pendente Integração</p>
-                 <p className="text-3xl font-black text-red-900">{stats.onboardingPending}</p>
-              </div>
-              <div className="bg-gray-950 p-8 rounded-[2.5rem] text-center text-white">
-                 <p className="text-[10px] font-black text-indigo-400 uppercase mb-2">Pedidos de Líderes</p>
-                 <p className="text-3xl font-black">{trainingRequests.filter(r => r.status === 'Pendente').length}</p>
-              </div>
-           </div>
+            )}
 
-           <div className="bg-white rounded-[4rem] shadow-sm border border-gray-100 overflow-hidden">
-              <div className="p-8 border-b border-gray-50 flex justify-between items-center bg-gray-50/20">
-                 <h3 className="text-xl font-black text-gray-900 uppercase tracking-tighter">Biblioteca e Governança de Treinamento</h3>
-                 <div className="flex gap-3">
-                    <button onClick={() => setIsAssignModalOpen(true)} className="px-6 py-3 bg-indigo-600 text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg shadow-indigo-100">Atribuição em Massa</button>
-                    <button className="px-6 py-3 bg-gray-900 text-white rounded-xl text-[9px] font-black uppercase tracking-widest shadow-lg">+ Novo Curso Interno</button>
+            {activeTab === 'manager' && (
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-6 animate-fadeIn">
+                {teamMembers.map(member => (
+                  <div key={member.id} className="bg-white border border-slate-200 p-8 shadow-sm flex flex-col justify-between hover:border-slate-900 transition-all">
+                     <div className="flex items-center gap-4 mb-10">
+                        <div className="w-10 h-10 bg-slate-50 border border-slate-100 flex items-center justify-center font-bold text-slate-400">
+                           {member.name[0]}
+                        </div>
+                        <div>
+                           <p className="font-bold text-slate-900 text-sm tracking-tight leading-none mb-1 uppercase italic">{member.name}</p>
+                           <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest">{member.role}</p>
+                        </div>
+                     </div>
+                     
+                     <div className="space-y-6">
+                        <div className="bg-slate-50 p-4 border border-slate-100">
+                           <div className="flex justify-between text-[8px] font-bold uppercase tracking-widest text-slate-400 mb-2">
+                              <span>Aquis. de Skills</span>
+                              <span className="text-slate-900">78%</span>
+                           </div>
+                           <div className="w-full h-0.5 bg-white overflow-hidden">
+                              <div className="h-full bg-blue-600" style={{ width: '78%' }}></div>
+                           </div>
+                        </div>
+                        <button className="w-full py-3 text-[9px] font-bold uppercase tracking-widest text-slate-400 border border-slate-100 hover:text-slate-900 hover:bg-slate-50 transition-all">
+                           Auditar PDI
+                        </button>
+                     </div>
+                  </div>
+                ))}
+              </div>
+            )}
+
+            {activeTab === 'admin' && (
+              <div className="bg-white border border-slate-200 shadow-sm overflow-hidden animate-fadeIn">
+                 <div className="p-8 border-b border-slate-50 flex justify-between items-center bg-slate-50/50">
+                    <h4 className="text-[10px] font-bold text-slate-900 uppercase tracking-widest italic">Curadoria de Conhecimento</h4>
+                    <button 
+                      onClick={() => setIsAssignModalOpen(true)}
+                      className="px-6 py-2 bg-slate-900 text-white text-[9px] font-bold uppercase tracking-widest hover:bg-blue-600 transition-all"
+                    >
+                       Atribuir Manual
+                    </button>
+                 </div>
+                 
+                 <div className="overflow-x-auto">
+                    <table className="w-full text-left">
+                       <thead>
+                          <tr className="bg-slate-50 text-[9px] font-bold text-slate-400 uppercase tracking-[0.2em] border-b border-slate-100">
+                             <th className="px-8 py-5">Módulo Acadêmico</th>
+                             <th className="px-6 py-5">Escopo</th>
+                             <th className="px-6 py-5">Facilitador</th>
+                             <th className="px-8 py-5 text-right">Métricas Ativas</th>
+                          </tr>
+                       </thead>
+                       <tbody className="divide-y divide-slate-50">
+                          {trainings.map(t => (
+                            <tr key={t.id} className="hover:bg-slate-50 transition-colors group">
+                               <td className="px-8 py-6">
+                                  <p className="text-sm font-bold text-slate-900 tracking-tight leading-none mb-1 uppercase italic">{t.name}</p>
+                                  <p className="text-[8px] font-mono text-slate-300 uppercase mt-0.5 tracking-tighter">NODE: {t.id.toUpperCase()}</p>
+                               </td>
+                               <td className="px-6 py-6">
+                                  <span className={`px-2 py-0.5 text-[8px] font-bold uppercase border ${t.isMandatory ? 'bg-red-50 border-red-100 text-red-600' : 'bg-blue-50 border-blue-100 text-blue-600'}`}>
+                                     {t.category}
+                                  </span>
+                               </td>
+                               <td className="px-6 py-6 text-xs font-medium text-slate-500">{t.instructor}</td>
+                               <td className="px-8 py-6 text-right">
+                                  <span className="text-[9px] font-bold text-emerald-600 uppercase tracking-widest">Active Level</span>
+                               </td>
+                             </tr>
+                          ))}
+                       </tbody>
+                    </table>
                  </div>
               </div>
-              
-              <div className="overflow-x-auto">
-                 <table className="w-full text-left">
-                    <thead>
-                       <tr className="bg-gray-50 text-[10px] font-black text-gray-400 uppercase tracking-widest font-black">
-                          <th className="px-8 py-6">Programa Interno</th>
-                          <th className="px-8 py-6">Tipo</th>
-                          <th className="px-8 py-6">Facilitador</th>
-                          <th className="px-8 py-6">Status Conclusão</th>
-                          <th className="px-8 py-6 text-right">Ações</th>
-                       </tr>
-                    </thead>
-                    <tbody className="divide-y divide-gray-100">
-                       {trainings.map(t => {
-                          const completions = employeeTrainings.filter(et => et.trainingId === t.id && et.status === 'Concluído').length;
-                          const total = employeeTrainings.filter(et => et.trainingId === t.id).length;
-                          const perc = total > 0 ? Math.round((completions / total) * 100) : 0;
-                          return (
-                            <tr key={t.id} className="hover:bg-gray-50 transition-colors">
-                               <td className="px-8 py-6">
-                                  <p className="text-sm font-black text-gray-900">{t.name}</p>
-                                  <p className="text-[9px] font-bold text-gray-400 uppercase tracking-widest">{t.durationHours}h de carga horária</p>
-                               </td>
-                               <td className="px-8 py-6">
-                                  <span className={`px-2 py-0.5 rounded text-[8px] font-black uppercase ${t.isMandatory ? 'bg-red-50 text-red-600' : 'bg-blue-50 text-blue-600'}`}>{t.category}</span>
-                               </td>
-                               <td className="px-8 py-6 text-sm font-bold text-gray-600">{t.instructor}</td>
-                               <td className="px-8 py-6">
-                                  <div className="flex items-center gap-3">
-                                     <div className="flex-1 h-1.5 w-24 bg-gray-100 rounded-full overflow-hidden">
-                                        <div className="h-full bg-indigo-600" style={{ width: `${perc}%` }}></div>
-                                     </div>
-                                     <span className="text-[10px] font-black text-indigo-600">{perc}%</span>
-                                  </div>
-                               </td>
-                               <td className="px-8 py-6 text-right">
-                                  <button className="p-2 text-gray-400 hover:text-indigo-600"><svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" /><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" /></svg></button>
-                               </td>
-                            </tr>
-                          );
-                       })}
-                    </tbody>
-                 </table>
-              </div>
-           </div>
+            )}
+          </div>
         </div>
-      )}
+
+        <aside className="space-y-8">
+          <div className="bg-white border border-slate-200 p-8 shadow-sm">
+             <h4 className="text-[9px] font-bold uppercase tracking-widest text-slate-400 mb-8 border-b border-slate-50 pb-4 italic">Performance Intel</h4>
+             
+             <div className="space-y-12">
+                <div className="text-center group">
+                   <p className="text-[9px] font-bold text-slate-300 uppercase mb-2 tracking-widest">Conhecimento Sincronizado</p>
+                   <p className="text-6xl font-bold text-slate-900 tracking-tighter italic group-hover:text-blue-600 transition-colors leading-none">{stats.totalHours}</p>
+                   <p className="text-[10px] font-bold text-slate-400 uppercase mt-2 tracking-tighter italic">Horas Acumuladas</p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="p-4 bg-slate-50 border border-slate-100">
+                     <p className="text-2xl font-bold text-slate-900 tracking-tighter leading-none mb-1 italic">{stats.pending}</p>
+                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Gaps Pendentes</p>
+                  </div>
+                  
+                  <div className="p-4 bg-slate-50 border border-slate-100">
+                     <p className="text-2xl font-bold text-slate-900 tracking-tighter leading-none mb-1 italic">TOP 3%</p>
+                     <p className="text-[8px] font-bold text-slate-400 uppercase tracking-widest">Global Rank</p>
+                  </div>
+                </div>
+
+                <div className="pt-8 border-t border-slate-50">
+                   <p className="text-[9px] font-bold text-slate-400 uppercase tracking-widest mb-4 italic">Matriz de Validação</p>
+                   <div className="flex gap-1.5 h-1">
+                      {[1, 2, 3, 4, 5, 6].map(i => (
+                        <div key={i} className={`flex-1 transition-all duration-700 ${i <= 4 ? 'bg-blue-600' : 'bg-slate-100'}`}></div>
+                      ))}
+                   </div>
+                </div>
+             </div>
+          </div>
+
+          <div className="bg-slate-900 p-8 text-white shadow-lg shadow-slate-900/10 relative overflow-hidden group">
+             <div className="absolute top-[-20%] left-[-20%] w-32 h-32 bg-blue-600 rounded-full blur-3xl opacity-10"></div>
+             <h4 className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-6 relative z-10">Insignias de Skills</h4>
+             <div className="grid grid-cols-2 gap-4 relative z-10">
+                {[1, 2, 3, 4].map(i => (
+                  <div key={i} className={`aspect-square border flex items-center justify-center transition-all ${i === 1 ? 'border-blue-500/30 bg-blue-500/10 text-blue-500' : 'border-white/5 bg-white/5 text-white/10'}`}>
+                     <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4M7.835 4.697l12-8" /></svg>
+                  </div>
+                ))}
+             </div>
+          </div>
+        </aside>
+      </div>
 
       <AssignTrainingModal 
         isOpen={isAssignModalOpen} 

@@ -5,7 +5,8 @@ import {
   Employee, JobOpening, Candidate, TimeRecord, VacationRequest, Benefit, 
   EmployeeBenefit, MonthlyPayroll, PayrollEvent, ManualEntry, Training, 
   EmployeeTraining, TrainingRequest, ContractType, PerformanceEvaluation,
-  HealthRecord, MedicalCertificate, EPIRecord
+  HealthRecord, MedicalCertificate, EPIRecord,
+  CommunicationPost, ReactionType, PostComment, Recognition
 } from '../types';
 
 interface HRContextType {
@@ -69,6 +70,13 @@ interface HRContextType {
   handleCertificate: (id: string, status: 'Validado' | 'Rejeitado') => void;
   addEPIRecord: (record: any) => void;
   syncESocial: (empId: string) => Promise<void>;
+  // Novos módulos expandidos
+  communicationPosts: CommunicationPost[];
+  addCommunicationPost: (post: Omit<CommunicationPost, 'id'>) => void;
+  reactToPost: (postId: string, reaction: ReactionType, userId: string) => void;
+  commentOnPost: (postId: string, content: string, authorId: string) => void;
+  recognitions: Recognition[];
+  addRecognition: (data: Omit<Recognition, 'id'>) => void;
 }
 
 const HRContext = createContext<HRContextType | undefined>(undefined);
@@ -93,42 +101,73 @@ export const HRProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
   const [healthRecords, setHealthRecords] = useState<HealthRecord[]>(MOCK_HEALTH_RECORDS as any);
   const [medicalCertificates, setMedicalCertificates] = useState<MedicalCertificate[]>([]);
   const [epiRecords, setEpiRecords] = useState<EPIRecord[]>([]);
+  // Estado dos novos módulos
+  const [communicationPosts, setCommunicationPosts] = useState<CommunicationPost[]>([
+    { id: 'p1', authorId: 'emp1', type: 'comunicado', title: 'Bem-vindos ao novo Portal RH Nexus!', content: 'Estamos felizes em apresentar o novo sistema de gestão de pessoas Nexus RH. Explore os novos módulos de comunicação, academia, reconhecimentos e muito mais!', targetDepartments: [], targetRoles: [], createdAt: new Date(Date.now() - 86400000 * 2).toISOString(), reactions: { like: ['emp2', 'emp3'], aplauso: ['emp4'], star: [], coração: ['emp5'] }, comments: [{ id: 'c1', authorId: 'emp2', content: 'Excelente iniciativa! O sistema está incrível.', createdAt: new Date(Date.now() - 86400000).toISOString() }], published: true },
+    { id: 'p2', authorId: 'emp1', type: 'evento', title: 'Workshop de Liderança — 25/11', content: 'Convidamos todos os gestores e coordenadores para o Workshop de Liderança Situacional. Inscrições até 20/11. Vagas limitadas!', targetDepartments: [], targetRoles: [], createdAt: new Date(Date.now() - 86400000 * 5).toISOString(), reactions: { like: ['emp3'], aplauso: [], star: ['emp2'], coração: [] }, comments: [], published: true },
+    { id: 'p3', authorId: 'emp1', type: 'aviso', title: 'Prazo de Avaliações de Desempenho — Ciclo Q4', content: 'Lembramos que o prazo para conclusão das avaliações de desempenho do ciclo Q4 é 30/11. Gestores, acessem o módulo de Performance para preencher os formulários.', targetDepartments: [], targetRoles: [], createdAt: new Date(Date.now() - 86400000 * 7).toISOString(), reactions: { like: [], aplauso: [], star: [], coração: [] }, comments: [], published: true },
+  ]);
+  const [recognitions, setRecognitions] = useState<Recognition[]>([
+    { id: 'r1', employeeId: 'emp2', grantedBy: 'emp1', type: 'destaque_mes', title: 'Destaque do Mês', description: 'Reconhecimento pelo excelente trabalho no projeto de transformação digital, superando todas as metas estabelecidas.', createdAt: new Date(Date.now() - 86400000 * 10).toISOString(), points: 100 },
+    { id: 'r2', employeeId: 'emp3', grantedBy: 'emp1', type: 'performance', title: 'Alta Performance', description: 'Performance excepcional no trimestre com resultados acima da meta em todas as métricas avaliadas.', createdAt: new Date(Date.now() - 86400000 * 5).toISOString(), points: 80 },
+  ]);
   
   // Auth State
   const [authenticatedUser, setAuthenticatedUser] = useState<Employee | null>(null);
 
-  // Lógica de Login
+  // Lógica de Login Integrada (SaaS Auth)
   const login = async (email: string, password: string) => {
-    // Simulação de delay de rede
-    await new Promise(r => setTimeout(r, 800));
-    
-    // Procura na base de funcionários
-    const user = employees.find(e => e.email === email);
-    
-    // Senhas simplificadas para o protótipo: admin123 ou nexus123
-    const correctPassword = user?.userRole === 'ADMIN' ? 'admin123' : 'nexus123';
-    
-    if (user && password === correctPassword) {
-      setAuthenticatedUser(user);
-      localStorage.setItem('nexus_user_id', user.id);
-      return true;
+    try {
+      const resp = await fetch('http://localhost:3001/api/auth/login', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email, password })
+      });
+      const data = await resp.json();
+      
+      if (resp.ok && data.success) {
+         // Modelando Payload do Backend para o Typescript Front-End
+         const user = { 
+           id: data.user.id.toString(), 
+           name: data.user.name, 
+           email: email, 
+           position: data.user.role === 'ADMIN' ? 'C-Level' : (data.user.role === 'LIDER' ? 'Liderança' : 'Colaborador'),
+           status: 'Ativo',
+           image: 'https://ui-avatars.com/api/?name=' + encodeURIComponent(data.user.name) + '&background=0D1117&color=fff',
+           userRole: data.user.role,
+           department: 'Gestão Inteligente',
+           performanceScore: 95
+         } as unknown as Employee;
+         
+         setAuthenticatedUser(user);
+         localStorage.setItem('nexus_token', data.token);
+         localStorage.setItem('nexus_user_data', JSON.stringify(user));
+         return true;
+      }
+      console.warn('Backend Auth Rejeitou Login:', data.error);
+      return false;
+    } catch(err) {
+      console.error('Network Error ao falar com Node API:', err);
+      return false;
     }
-    return false;
   };
 
   const logout = () => {
     setAuthenticatedUser(null);
-    localStorage.removeItem('nexus_user_id');
+    localStorage.removeItem('nexus_token');
+    localStorage.removeItem('nexus_user_data');
   };
 
-  // Tenta recuperar sessão ao iniciar
+  // Tenta recuperar sessão ao iniciar via Storage Nativo do Auth
   useEffect(() => {
-    const savedId = localStorage.getItem('nexus_user_id');
-    if (savedId) {
-      const user = employees.find(e => e.id === savedId);
-      if (user) setAuthenticatedUser(user);
+    const token = localStorage.getItem('nexus_token');
+    const userData = localStorage.getItem('nexus_user_data');
+    if (token && userData) {
+       try {
+         setAuthenticatedUser(JSON.parse(userData));
+       } catch(e) {}
     }
-  }, [employees]);
+  }, []);
 
   const updateCandidate = (id: string, data: Partial<Candidate>) => setCandidates(prev => prev.map(c => c.id === id ? { ...c, ...data } : c));
 
@@ -239,8 +278,23 @@ export const HRProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
       addMedicalCertificate: (c) => setMedicalCertificates([...medicalCertificates, { ...c, id: `c-${Date.now()}`, status: 'Pendente' }]),
       handleCertificate: (id, s) => setMedicalCertificates(prev => prev.map(c => c.id === id ? { ...c, status: s } : c)),
       addEPIRecord: (r) => setEpiRecords([...epiRecords, { ...r, id: `epi-${Date.now()}`, status: 'Entregue' }]),
-      syncESocial: async (id) => { await new Promise(r => setTimeout(r, 1000)); }
+      syncESocial: async (id) => { await new Promise(r => setTimeout(r, 1000)); },
+      // Novos m\u00f3dulos
+      communicationPosts,
+      addCommunicationPost: (post) => setCommunicationPosts(prev => [{ ...post, id: `p-${Date.now()}` }, ...prev]),
+      reactToPost: (postId, reaction, userId) => setCommunicationPosts(prev => prev.map(p => {
+        if (p.id !== postId) return p;
+        const current = p.reactions[reaction] || [];
+        const toggled = current.includes(userId) ? current.filter(id => id !== userId) : [...current, userId];
+        return { ...p, reactions: { ...p.reactions, [reaction]: toggled } };
+      })),
+      commentOnPost: (postId, content, authorId) => setCommunicationPosts(prev => prev.map(p =>
+        p.id !== postId ? p : { ...p, comments: [...(p.comments || []), { id: `c-${Date.now()}`, authorId, content, createdAt: new Date().toISOString() }] }
+      )),
+      recognitions,
+      addRecognition: (data) => setRecognitions(prev => [{ ...data, id: `r-${Date.now()}` }, ...prev]),
     }}>
+
       {children}
     </HRContext.Provider>
   );
