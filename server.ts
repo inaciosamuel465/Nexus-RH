@@ -16,12 +16,12 @@ dotenv.config();
 
 const app = express();
 const httpServer = createServer(app);
-const io = initSocket(httpServer);
+export const io = initSocket(httpServer);
 
 app.use(cors());
 app.use(express.json({ limit: '50mb' }));
 
-const PORT = process.env.PORT || 3001;
+const PORT = parseInt(process.env.PORT as string) || 3001;
 
 // Configuração Socket.io para o Módulo de Comunicação
 io.on('connection', (socket) => {
@@ -44,12 +44,7 @@ app.post('/login', login);
 app.post('/api/loguin', login);
 
 app.get('/api/status', (req, res) => {
-  res.json({ status: 'Nexus HR SaaS Platform is Running (MongoDB + NeonDB + WebSockets)' });
-});
-
-// Neutralizador CSP: Fallback Global em JSON (Impede o HTML 404 padrão do NodeJS Express e suprime alertas do Chrome DevTools)
-app.use((req, res) => {
-  res.status(404).json({ success: false, error: 'Endpoint ou arquivo JSON não encontrado na API Node: ' + req.originalUrl });
+  res.json({ status: 'Nexus HR SaaS Platform is Running (PostgreSQL + WebSockets)' });
 });
 
 // Inicialização Global Controlada
@@ -59,8 +54,10 @@ httpServer.listen(PORT, async () => {
   logger.info(`===============================================`);
   
   try {
-     // 1. Conectar MongoDB Document Store
-     await connectMongo();
+     // 1. Conectar e Migrar NeonDB (PostgreSQL)
+     const { createAllTables } = await import('./src/core/migrations.js');
+     await createAllTables();
+     logger.info('NeonDB (PostgreSQL): Infraestrutura de tabelas pronta e ativa.');
 
      // 2. Boot do Motor de IAM (Skills Plugaveis)
      await skillService.boot();
@@ -71,7 +68,13 @@ httpServer.listen(PORT, async () => {
      await moduleManager.loadModules();
      logger.info('Rotas modulares de aplicação MVC injetadas e ativas ao ambiente SaaS.');
      
+     // 4. Neutralizador CSP: Fallback Global em JSON (Apenas depois dos módulos carregarem)
+     app.use((req, res) => {
+       res.status(404).json({ success: false, error: 'Endpoint ou arquivo JSON não encontrado na API Node: ' + req.originalUrl });
+     });
+     
   } catch (err) {
      logger.error('Falha severa na Boot Sequence da Plataforma SaaS:', err);
   }
 });
+

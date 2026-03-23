@@ -96,16 +96,92 @@ const ExportPreviewModal: React.FC<{
   );
 };
 
+const RequestAdjustmentModal: React.FC<{
+  isOpen: boolean;
+  onClose: () => void;
+  onSubmit: (data: any) => void;
+}> = ({ isOpen, onClose, onSubmit }) => {
+  const [date, setDate] = useState('');
+  const [type, setType] = useState<TimeRecordType>('Entrada');
+  const [time, setTime] = useState('');
+  const [reason, setReason] = useState('Esquecimento');
+  const [notes, setNotes] = useState('');
+
+  if (!isOpen) return null;
+
+  return (
+    <div className="fixed inset-0 z-[250] flex items-center justify-center p-4 bg-slate-900/80 backdrop-blur-md animate-fadeIn">
+      <div className="bg-white dark:bg-slate-950 border border-slate-200 dark:border-slate-800 w-full max-w-lg shadow-2xl overflow-hidden flex flex-col relative animate-slideIn">
+         <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-600 to-indigo-600"></div>
+         <div className="p-8 border-b border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50">
+           <h3 className="text-xl font-bold text-slate-900 dark:text-white uppercase italic tracking-tight">Solicitar Ajuste / Abono</h3>
+           <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 mt-1 uppercase tracking-[0.3em] italic">Protocolo de Correção de Jornada</p>
+         </div>
+         <div className="p-8 space-y-6">
+            <div className="grid grid-cols-2 gap-6">
+              <div className="space-y-2">
+                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] italic">Data</label>
+                 <input type="date" value={date} onChange={e => setDate(e.target.value)} className="w-full border-b border-slate-200 dark:border-slate-800 py-3 text-sm text-slate-900 dark:text-white font-bold outline-none bg-transparent" />
+              </div>
+              <div className="space-y-2">
+                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] italic">Horário</label>
+                 <input type="time" value={time} onChange={e => setTime(e.target.value)} className="w-full border-b border-slate-200 dark:border-slate-800 py-3 text-sm text-slate-900 dark:text-white font-bold outline-none bg-transparent" />
+              </div>
+            </div>
+            <div className="space-y-2">
+               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] italic">Tipo de Batida</label>
+               <select value={type} onChange={e => setType(e.target.value as TimeRecordType)} className="w-full border-b border-slate-200 dark:border-slate-800 py-3 text-sm text-slate-900 dark:text-white font-bold outline-none bg-transparent">
+                 <option value="Entrada" className="dark:bg-slate-900">Entrada</option>
+                 <option value="Intervalo Início" className="dark:bg-slate-900">Intervalo Início</option>
+                 <option value="Intervalo Fim" className="dark:bg-slate-900">Intervalo Fim</option>
+                 <option value="Saída" className="dark:bg-slate-900">Saída</option>
+               </select>
+            </div>
+            <div className="space-y-2">
+               <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] italic">Motivo (Abono/Correção)</label>
+               <select value={reason} onChange={e => setReason(e.target.value)} className="w-full border-b border-slate-200 dark:border-slate-800 py-3 text-sm text-slate-900 dark:text-white font-bold outline-none bg-transparent">
+                 <option value="Esquecimento" className="dark:bg-slate-900">Esquecimento</option>
+                 <option value="Problema Técnico" className="dark:bg-slate-900">Problema Técnico no Ponto</option>
+                 <option value="Serviço Externo" className="dark:bg-slate-900">Serviço Externo</option>
+                 <option value="Atestado/Declaração" className="dark:bg-slate-900">Atestado / Declaração</option>
+                 <option value="Outros" className="dark:bg-slate-900">Outros</option>
+               </select>
+            </div>
+            {reason === 'Outros' || reason === 'Atestado/Declaração' ? (
+              <div className="space-y-2">
+                 <label className="text-[10px] font-bold text-slate-500 uppercase tracking-[0.2em] italic">Detalhes / Justificativa</label>
+                 <textarea value={notes} onChange={e => setNotes(e.target.value)} className="w-full border-b border-slate-200 dark:border-slate-800 py-3 text-sm text-slate-900 dark:text-white font-bold outline-none bg-transparent min-h-[80px]" placeholder="Descreva o motivo..."></textarea>
+              </div>
+            ) : null}
+         </div>
+         <div className="p-8 border-t border-slate-100 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 flex gap-4">
+            <button onClick={onClose} className="flex-1 py-4 border border-slate-200 dark:border-slate-800 text-[10px] font-bold uppercase tracking-widest text-slate-500 hover:bg-white dark:hover:bg-slate-900 transition-all">Cancelar</button>
+            <button 
+              disabled={!date || !time}
+              onClick={() => { onSubmit({ date, type, timestamp: time, location: reason, notes }); onClose(); }}
+              className="flex-[2] py-4 bg-blue-600 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-blue-500 transition-all disabled:opacity-30"
+            >
+              Protocolar Solicitação
+            </button>
+         </div>
+      </div>
+    </div>
+  );
+};
+
 const TimeTracking: React.FC = () => {
   const { 
-    timeRecords, employees, syncESocial
+    timeRecords, employees, syncESocial, authenticatedUser, requestAdjustment
   } = useHR();
   
+  const isAdmin = authenticatedUser?.userRole === 'ADMIN' || authenticatedUser?.userRole === 'LIDER';
+  
   const [selectedDept, setSelectedDept] = useState('Todos');
-  const [selectedEmpId, setSelectedEmpId] = useState('');
+  const [selectedEmpId, setSelectedEmpId] = useState(isAdmin ? '' : authenticatedUser?.id || '');
   const [isSyncing, setIsSyncing] = useState(false);
   const [isExporting, setIsExporting] = useState(false);
   const [showExportModal, setShowExportModal] = useState(false);
+  const [showAdjModal, setShowAdjModal] = useState(false);
 
   const departments = useMemo(() => ['Todos', ...Array.from(new Set(employees.map(e => e.department)))], [employees]);
   const filteredEmployees = useMemo(() => selectedDept === 'Todos' ? employees : employees.filter(e => e.department === selectedDept), [employees, selectedDept]);
@@ -147,43 +223,56 @@ const TimeTracking: React.FC = () => {
     }, 800);
   };
 
+  const handleAdjustmentSubmit = (data: any) => {
+    if (!selectedEmpId) return;
+    requestAdjustment({ ...data, employeeId: selectedEmpId });
+    alert('Solicitação de ajuste protocolada e enviada para aprovação.');
+  };
+
   return (
-    <div className="space-y-8 animate-fadeIn pb-20">
-      <div className="bg-slate-900 border border-slate-200 dark:border-slate-800 relative min-h-[220px] flex items-center px-10 overflow-hidden shadow-2xl">
+    <div className="space-y-6 md:space-y-8 animate-fadeIn pb-20">
+      <div className="bg-slate-900 border border-slate-200 dark:border-slate-800 relative min-h-[180px] md:min-h-[220px] flex items-center px-6 md:px-10 overflow-hidden shadow-2xl">
          <img 
             src="https://images.unsplash.com/photo-1508962914676-134849a727f0?auto=format&fit=crop&q=80&w=1200" 
             className="absolute inset-0 w-full h-full object-cover opacity-10 grayscale"
             alt="Time Tracking"
          />
-         <div className="relative z-10 w-full flex flex-col lg:flex-row justify-between items-center gap-8 animate-slideDown">
+         <div className="relative z-10 w-full flex flex-col lg:flex-row justify-between items-center gap-6 md:gap-8 animate-slideDown text-center lg:text-left">
             <div>
-               <h1 className="text-4xl font-bold text-white tracking-tighter uppercase italic">Protocolo de Jornada</h1>
-               <p className="text-sm text-slate-400 mt-2 max-w-lg font-medium italic leading-relaxed">Auditoria biométrica em tempo real e sincronização neural com os pilares do eSocial.</p>
+               <h1 className="text-2xl md:text-4xl font-bold text-white tracking-tighter uppercase italic">Protocolo de Jornada</h1>
+               <p className="text-[10px] md:text-sm text-slate-400 mt-2 max-w-lg font-medium italic leading-relaxed">Auditoria biométrica em tempo real e sincronização neural com os pilares do eSocial.</p>
             </div>
             
-            <div className="flex bg-white/5 backdrop-blur-xl p-1 border border-white/10 gap-6 shadow-2xl">
-              <div className="flex items-center">
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] px-4 italic">Business Unit</span>
+            {isAdmin ? (
+            <div className="flex flex-col sm:flex-row bg-white/5 backdrop-blur-xl p-1 border border-white/10 gap-0 sm:gap-6 shadow-2xl w-full lg:w-auto">
+              <div className="flex items-center border-b sm:border-b-0 sm:border-r border-white/10">
+                <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.3em] px-4 italic">B. Unit</span>
                 <select 
-                  className="bg-transparent text-[10px] font-bold uppercase text-white outline-none cursor-pointer py-3 italic"
+                  className="bg-transparent text-[9px] font-bold uppercase text-white outline-none cursor-pointer py-3 italic flex-1"
                   value={selectedDept}
                   onChange={(e) => { setSelectedDept(e.target.value); setSelectedEmpId(''); }}
                 >
                   {departments.map(d => <option key={d} value={d} className="bg-slate-900 font-sans">{d}</option>)}
                 </select>
               </div>
-              <div className="flex items-center border-l border-white/10 pl-2">
-                <span className="text-[10px] font-bold text-white/30 uppercase tracking-[0.3em] px-4 italic">Recurso Humano</span>
+              <div className="flex items-center">
+                <span className="text-[9px] font-bold text-white/30 uppercase tracking-[0.3em] px-4 italic">Recurso</span>
                 <select 
-                  className="bg-transparent text-[10px] font-bold uppercase text-white outline-none cursor-pointer py-3 max-w-[220px] italic"
+                  className="bg-transparent text-[9px] font-bold uppercase text-white outline-none cursor-pointer py-3 max-w-full italic flex-1"
                   value={selectedEmpId}
                   onChange={(e) => setSelectedEmpId(e.target.value)}
                 >
-                  <option value="" className="bg-slate-900 font-sans">Aguardando Seleção...</option>
+                  <option value="" className="bg-slate-900 font-sans text-xs">Selecionar...</option>
                   {filteredEmployees.map(e => <option key={e.id} value={e.id} className="bg-slate-900 font-sans">{e.name}</option>)}
                 </select>
               </div>
             </div>
+            ) : (
+              <div className="bg-white/5 backdrop-blur-xl p-4 border border-white/10 shadow-2xl">
+                <span className="text-[10px] font-bold text-white/50 uppercase tracking-[0.3em] italic">Colaborador Atual</span>
+                <p className="text-white font-bold uppercase mt-1">{authenticatedUser?.name}</p>
+              </div>
+            )}
          </div>
       </div>
 
@@ -197,54 +286,60 @@ const TimeTracking: React.FC = () => {
                <p className="text-slate-400 dark:text-slate-600 font-bold uppercase tracking-[0.5em] text-[10px] italic">Aguardando definição de parâmetro para auditoria Nexus</p>
             </div>
           ) : (
-            <div className="space-y-10 animate-fadeIn">
-               <div className="nexus-card p-10 flex flex-col md:flex-row items-center justify-between gap-10 group relative overflow-hidden">
+            <div className="space-y-6 md:space-y-10 animate-fadeIn px-4 md:px-0">
+               <div className="nexus-card p-6 md:p-10 flex flex-col md:flex-row items-center justify-between gap-6 md:gap-10 group relative overflow-hidden text-center md:text-left">
                   <div className="absolute top-0 right-0 w-60 h-60 bg-blue-600/5 -mr-32 -mt-32 rounded-full group-hover:scale-150 transition-transform"></div>
-                  <div className="flex items-center gap-8 relative z-10">
-                    <div className="w-20 h-20 bg-slate-100 dark:bg-slate-900 flex items-center justify-center font-bold text-2xl text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 italic transition-all group-hover:bg-slate-900 dark:group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent">
+                  <div className="flex flex-col md:flex-row items-center gap-6 md:gap-8 relative z-10 w-full md:w-auto">
+                    <div className="w-16 h-16 md:w-20 md:h-20 bg-slate-100 dark:bg-slate-900 flex items-center justify-center font-bold text-xl md:text-2xl text-slate-400 dark:text-slate-600 border border-slate-200 dark:border-slate-800 italic transition-all group-hover:bg-slate-900 dark:group-hover:bg-blue-600 group-hover:text-white group-hover:border-transparent shrink-0">
                        {selectedEmployee?.name.split(' ').map(n => n[0]).join('')}
                     </div>
                     <div>
-                      <h3 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tighter uppercase italic group-hover:text-blue-600 transition-colors">{selectedEmployee?.name}</h3>
-                      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 mt-2 uppercase tracking-[0.3em] italic">Bio-Sync eSocial Protocolo Ativo</p>
+                      <h3 className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tracking-tighter uppercase italic group-hover:text-blue-600 transition-colors">{selectedEmployee?.name}</h3>
+                      <p className="text-[9px] md:text-[10px] font-bold text-slate-400 dark:text-slate-600 mt-1 md:mt-2 uppercase tracking-[0.3em] italic">Bio-Sync eSocial Protocolo Ativo</p>
                     </div>
                   </div>
                   
-                  <div className="flex gap-6 relative z-10">
-                    <button onClick={handleExport} disabled={isExporting} className="px-10 py-4 bg-slate-900 dark:bg-blue-600 text-white text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-blue-700 dark:hover:bg-blue-500 transition-all duration-500 shadow-2xl italic disabled:opacity-30">
-                      {isExporting ? 'Processando Audit...' : 'Gerar Cronograma'}
+                  <div className="flex flex-col sm:flex-row gap-4 md:gap-6 relative z-10 w-full md:w-auto">
+                    <button onClick={handleExport} disabled={isExporting} className="px-6 md:px-10 py-3 md:py-4 bg-slate-900 dark:bg-blue-600 text-white text-[9px] md:text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-blue-700 dark:hover:bg-blue-500 transition-all duration-500 shadow-2xl italic disabled:opacity-30">
+                      {isExporting ? 'Processando...' : 'Gerar Cronograma'}
                     </button>
-                    <button onClick={handleSync} disabled={isSyncing} className="px-10 py-4 border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-slate-100 dark:hover:bg-slate-900 transition-all italic disabled:opacity-30">
-                      {isSyncing ? 'Transmitindo...' : 'Flash eSocial'}
-                    </button>
+                    {!isAdmin ? (
+                      <button onClick={() => setShowAdjModal(true)} className="px-6 md:px-10 py-3 md:py-4 border border-slate-200 dark:border-slate-800 text-slate-900 dark:text-slate-100 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-slate-100 dark:hover:bg-slate-800 transition-all italic shadow-2xl">
+                        Solicitar Correção
+                      </button>
+                    ) : (
+                      <button onClick={handleSync} disabled={isSyncing} className="px-6 md:px-10 py-3 md:py-4 border border-slate-200 dark:border-slate-800 text-slate-400 dark:text-slate-600 text-[9px] md:text-[10px] font-bold uppercase tracking-[0.4em] hover:bg-slate-100 dark:hover:bg-slate-900 transition-all italic disabled:opacity-30">
+                        {isSyncing ? 'Transmitindo...' : 'Flash eSocial'}
+                      </button>
+                    )}
                   </div>
                </div>
 
-                <div className="space-y-8">
+                <div className="space-y-6 md:space-y-8">
                  {Object.entries(groupedRecords).map(([date, records]: [string, TimeRecord[]]) => (
-                    <div key={date} className="nexus-card p-10 group/day hover:shadow-2xl transition-all duration-700 overflow-hidden relative">
+                    <div key={date} className="nexus-card p-6 md:p-10 group/day hover:shadow-2xl transition-all duration-700 overflow-hidden relative">
                         <div className="absolute top-0 right-0 w-32 h-32 bg-slate-50 dark:bg-slate-900/50 -mr-16 -mt-16 group-hover/day:bg-blue-600/5 transition-all"></div>
-                        <div className="flex justify-between items-center mb-10 border-b border-slate-100 dark:border-slate-800 pb-8 relative z-10">
-                          <div className="flex items-center gap-8">
-                              <div className="flex flex-col items-center p-4 bg-slate-900 dark:bg-blue-600 border border-slate-900 dark:border-blue-700 min-w-[80px] text-white shadow-xl italic">
-                                <span className="text-3xl font-black italic tracking-tighter">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit' })}</span>
-                                <span className="text-[10px] font-bold uppercase tracking-[0.2em] mt-2 opacity-60">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'short' })}</span>
+                        <div className="flex flex-col sm:flex-row justify-between sm:items-center gap-6 mb-8 md:mb-10 border-b border-slate-100 dark:border-slate-800 pb-6 md:pb-8 relative z-10">
+                          <div className="flex items-center gap-4 md:gap-8">
+                              <div className="flex flex-col items-center p-3 md:p-4 bg-slate-900 dark:bg-blue-600 border border-slate-900 dark:border-blue-700 min-w-[70px] md:min-w-[80px] text-white shadow-xl italic shrink-0">
+                                <span className="text-2xl md:text-3xl font-black italic tracking-tighter">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { day: '2-digit' })}</span>
+                                <span className="text-[9px] font-bold uppercase tracking-[0.2em] mt-1 md:mt-2 opacity-60">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { month: 'short' })}</span>
                               </div>
                               <div>
-                                 <span className="text-sm font-bold text-slate-900 dark:text-white uppercase tracking-[0.3em] italic">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long' })}</span>
-                                 <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.3em] mt-2 italic border-l-2 border-blue-600 dark:border-blue-400 pl-4">Audit de Carga: 08:00h Nexus</p>
+                                 <span className="text-xs md:text-sm font-bold text-slate-900 dark:text-white uppercase tracking-[0.3em] italic">{new Date(date + 'T00:00:00').toLocaleDateString('pt-BR', { weekday: 'long' })}</span>
+                                 <p className="text-[9px] md:text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.3em] mt-1 md:mt-2 italic border-l-2 border-blue-600 dark:border-blue-400 pl-4">Audit de Carga: 08:00h Nexus</p>
                               </div>
                           </div>
                    
-                          <div className="text-right">
-                             <p className="text-[10px] font-bold text-slate-300 dark:text-slate-700 uppercase tracking-[0.3em] mb-2 italic">Diferencial Diário</p>
-                             <p className="text-2xl font-bold text-slate-900 dark:text-white tabular-nums italic group-hover/day:text-blue-600 dark:group-hover/day:text-blue-400 transition-colors">00:00</p>
+                          <div className="text-left sm:text-right">
+                             <p className="text-[9px] font-bold text-slate-300 dark:text-slate-700 uppercase tracking-[0.3em] mb-1 md:mb-2 italic">Diferencial Diário</p>
+                             <p className="text-xl md:text-2xl font-bold text-slate-900 dark:text-white tabular-nums italic group-hover/day:text-blue-600 dark:group-hover/day:text-blue-400 transition-colors">00:00</p>
                           </div>
                         </div>
 
-                        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6 relative z-10">
+                        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 md:gap-6 relative z-10">
                           {[...records].sort((a,b) => a.timestamp.localeCompare(b.timestamp)).map(tr => (
-                            <div key={tr.id} className="p-6 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 hover:border-blue-600 dark:hover:border-blue-500 transition-all duration-500 flex flex-col justify-between group/record">
+                            <div key={tr.id} className="p-4 md:p-6 bg-slate-50 dark:bg-slate-900/50 border border-slate-100 dark:border-slate-800 hover:border-blue-600 dark:hover:border-blue-500 transition-all duration-500 flex flex-col justify-between group/record">
                                 <div className="flex justify-between items-start mb-6">
                                   <div className="flex flex-col">
                                     <span className={`text-[9px] font-bold uppercase tracking-[0.2em] italic ${
@@ -315,6 +410,12 @@ const TimeTracking: React.FC = () => {
           records={groupedRecords} 
         />
       )}
+      
+      <RequestAdjustmentModal
+        isOpen={showAdjModal}
+        onClose={() => setShowAdjModal(false)}
+        onSubmit={handleAdjustmentSubmit}
+      />
     </div>
   );
 };

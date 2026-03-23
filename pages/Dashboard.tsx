@@ -1,13 +1,14 @@
 import React, { useMemo } from 'react';
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, PieChart, Pie, Cell } from 'recharts';
 import { useHR } from '../context/HRContext';
+import { analyticsApi } from '../services/api';
 
 const KPICard: React.FC<{ title: string; value: string | number; trend?: string; subtitle?: string }> = ({ title, value, trend, subtitle }) => (
-  <div className="nexus-card p-8 group hover:-translate-y-2 transition-all duration-500">
+  <div className="nexus-card p-4 md:p-8 group hover:-translate-y-2 transition-all duration-500">
     <div>
-      <p className="text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.3em] mb-4 italic border-b border-slate-50 dark:border-slate-800 pb-2">{title}</p>
-      <div className="flex items-baseline gap-3">
-        <span className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter italic">{value}</span>
+      <p className="text-[9px] md:text-[10px] font-bold text-slate-400 dark:text-slate-600 uppercase tracking-[0.3em] mb-4 italic border-b border-slate-50 dark:border-slate-800 pb-2">{title}</p>
+      <div className="flex items-baseline gap-2 md:gap-3">
+        <span className="text-2xl md:text-4xl font-black text-slate-900 dark:text-white tracking-tighter italic">{value}</span>
         {trend && (
           <span className={`text-[11px] font-black italic ${trend.startsWith('+') ? 'text-blue-600 dark:text-blue-400' : 'text-emerald-500 dark:text-emerald-400'}`}>
             {trend}
@@ -21,13 +22,21 @@ const KPICard: React.FC<{ title: string; value: string | number; trend?: string;
 
 const Dashboard: React.FC = () => {
   const { employees } = useHR();
+  const [kpis, setKpis] = React.useState<any>(null);
+
+  React.useEffect(() => {
+    analyticsApi.getKPIs().then(res => {
+      if (res.success) setKpis(res.data);
+    });
+  }, []);
 
   const metrics = useMemo(() => {
-    const total = employees.length;
-    const totalPayroll = employees.reduce((acc, curr) => acc + curr.salary, 0);
-    const activeCount = employees.filter(e => e.status === 'Ativo').length;
-    return { total, totalPayroll, turnover: 2.4, absentRate: 4.8, activeCount };
-  }, [employees]);
+    const total = kpis?.totalEmployees || employees.length;
+    const totalPayroll = kpis?.averageSalary ? (kpis.averageSalary * total) : employees.reduce((acc, curr) => acc + curr.salary, 0);
+    const turnover = kpis?.turnoverRate || 2.4;
+    const absentRate = kpis?.employeeSatisfaction ? (100 - kpis.employeeSatisfaction) / 4 : 4.8; // Fallback mock
+    return { total, totalPayroll, turnover, absentRate };
+  }, [employees, kpis]);
 
   const departmentData = useMemo(() => {
     const counts: Record<string, number> = {};
@@ -38,32 +47,32 @@ const Dashboard: React.FC = () => {
   const COLORS = ['#2563eb', '#1e293b', '#64748b', '#94a3b8', '#cbd5e1'];
 
   return (
-    <div className="space-y-8 animate-fadeIn pb-20">
-      <div className="bg-slate-900 border border-slate-200 dark:border-slate-800 relative min-h-[260px] flex items-center px-12 overflow-hidden shadow-2xl">
+    <div className="space-y-6 md:space-y-8 animate-fadeIn pb-20">
+      <div className="bg-slate-900 border border-slate-200 dark:border-slate-800 relative min-h-[180px] md:min-h-[260px] flex items-center px-6 md:px-12 overflow-hidden shadow-2xl">
          <img 
             src="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&q=80&w=1200" 
             className="absolute inset-0 w-full h-full object-cover opacity-10 grayscale"
             alt="Office"
          />
          <div className="relative z-10 max-w-3xl animate-slideDown">
-            <h1 className="text-5xl font-black text-white tracking-tighter italic uppercase mb-4 leading-none">Capital Intellect</h1>
-            <p className="text-slate-400 text-sm font-bold leading-relaxed italic max-w-xl uppercase tracking-widest opacity-80">
+            <h1 className="text-3xl md:text-5xl font-black text-white tracking-tighter italic uppercase mb-2 md:mb-4 leading-none">Capital Intellect</h1>
+            <p className="text-slate-400 text-[10px] md:text-sm font-bold leading-relaxed italic max-w-xl uppercase tracking-widest opacity-80">
                Navegação analítica da rede neural corporativa. Telemetria de KPIs, evolução financeira e pulso organizacional em tempo real.
             </p>
          </div>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-8">
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 md:gap-8 px-4 md:px-0">
         <KPICard title="Headcount Global" value={metrics.total} trend="+12" subtitle="Ingressos Sincronizados" />
         <KPICard title="Retenção (Stasis)" value={`${metrics.turnover}%`} trend="-0.4" subtitle="Fluxo de Estabilidade" />
         <KPICard title="Provisão Mensal" value={`R$ ${(metrics.totalPayroll / 1000).toFixed(0)}k`} trend="+5%" subtitle="Impacto On-Chain" />
         <KPICard title="Bio-Absenteísmo" value={`${metrics.absentRate}%`} trend="+0.2" subtitle="Nível de Presença" />
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
-        <div className="lg:col-span-2 nexus-card p-12 flex flex-col relative overflow-hidden group">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 md:gap-8 px-4 md:px-0">
+        <div className="lg:col-span-2 nexus-card p-6 md:p-12 flex flex-col relative overflow-hidden group">
           <div className="absolute top-0 right-0 w-64 h-64 bg-blue-600/5 -mr-32 -mt-32 rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
-          <div className="flex items-center justify-between mb-16 relative z-10">
+          <div className="flex flex-col md:flex-row md:items-center justify-between gap-6 mb-10 md:mb-16 relative z-10">
              <div className="flex items-center gap-6">
                 <div className="w-3 h-3 bg-blue-600 shadow-[0_0_10px_rgba(37,99,235,0.5)]"></div>
                 <h3 className="text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-[0.4em] italic">Telemetria de Fluxo Financeiro</h3>
@@ -94,13 +103,13 @@ const Dashboard: React.FC = () => {
           </div>
         </div>
 
-        <div className="nexus-card p-12 flex flex-col h-[580px] relative overflow-hidden group">
+        <div className="nexus-card p-6 md:p-12 flex flex-col h-auto md:h-[580px] relative overflow-hidden group">
           <div className="absolute bottom-0 left-0 w-48 h-48 bg-slate-100 dark:bg-slate-900 -ml-24 -mb-24 rounded-full group-hover:scale-150 transition-transform duration-1000"></div>
           <div className="flex items-center gap-6 border-b border-slate-50 dark:border-slate-800 pb-6 mb-10 relative z-10">
              <div className="w-3 h-3 bg-slate-900 dark:bg-white shadow-[0_0_10px_rgba(0,0,0,0.3)]"></div>
              <h3 className="text-[11px] font-bold text-slate-900 dark:text-white uppercase tracking-[0.4em] italic">Arquitetura de Unidades</h3>
           </div>
-          <div className="h-72 flex items-center justify-center relative z-10">
+          <div className="h-64 md:h-72 flex items-center justify-center relative z-10">
              <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                    <Pie 

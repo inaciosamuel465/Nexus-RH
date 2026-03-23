@@ -2,6 +2,9 @@ import React, { useState, useRef, useEffect } from 'react';
 import { useHR } from '../context/HRContext';
 import { sendChatMessage } from '../services/geminiService';
 
+// Tipagem básica para Web Speech API
+const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
 interface Message {
   id: string;
   role: 'user' | 'assistant';
@@ -42,8 +45,68 @@ const HRAssistant: React.FC<HRAssistantProps> = ({ embedded }) => {
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [filePreview, setFilePreview] = useState<string | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const [isListening, setIsListening] = useState(false);
+  const [voiceModeEnabled, setVoiceModeEnabled] = useState(false);
+  
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const recognitionRef = useRef<any>(null);
+
+  // Inicializa o Reconhecimento de Voz
+  useEffect(() => {
+    if (SpeechRecognition) {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'pt-BR';
+
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        setInput((prev) => prev ? `${prev} ${transcript}` : transcript);
+      };
+
+      recognition.onerror = (event: any) => {
+        console.error("Speech recognition error", event.error);
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognitionRef.current = recognition;
+    }
+  }, []);
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+    } else {
+      setInput(''); // limpa o input antes de nova fala
+      recognitionRef.current?.start();
+      setIsListening(true);
+    }
+  };
+
+  const speakText = (text: string) => {
+    if (!voiceModeEnabled || !('speechSynthesis' in window)) return;
+    
+    window.speechSynthesis.cancel();
+    
+    // Remove marcações de markdown e emojis para leitura mais limpa
+    const cleanText = text.replace(/[*#]/g, '').replace(/[\u{1F600}-\u{1F64F}]/gu, '');
+    const utterance = new SpeechSynthesisUtterance(cleanText);
+    utterance.lang = 'pt-BR';
+    utterance.rate = 1.1;
+    utterance.pitch = 1.0;
+    
+    // Tenta encontrar uma voz mais humanizada do Brasil
+    const voices = window.speechSynthesis.getVoices();
+    const brVoice = voices.find(v => v.lang === 'pt-BR' && v.name.includes('Google')) || voices.find(v => v.lang === 'pt-BR');
+    if (brVoice) utterance.voice = brVoice;
+    
+    window.speechSynthesis.speak(utterance);
+  };
 
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -84,9 +147,13 @@ DADOS ATUAIS DO SISTEMA:
 
 FUNCIONÁRIOS (resumo):
 ${employees.slice(0, 15).map(e => `- ${e.name} | ${e.department} | ${e.position} | Status: ${e.status} | Salário: R$ ${e.salary.toLocaleString('pt-BR')}`).join('\n')}
-${employees.length > 15 ? `... e mais ${employees.length - 15} colaboradores` : ''}
+${employees.length > 15 ? '... e mais ' + (employees.length - 15) + ' colaboradores' : ''}
 
-Responda sempre em português do Brasil, de forma clara, objetiva e profissional. Use formatação Markdown quando adequado (**negrito**, listas, etc).`;
+**INSTRUÇÕES IMPORTANTES: TRANSCRIÇÃO DE REUNIÕES**
+- Se o usuário enviar um texto grande que aparente ser uma transcrição (fala de reunião), você deve agir como secretário inteligente: gerando um RESUMO EXECUTIVO claro de 1 parágrafo, seguido de uma seção de "ACTION ITEMS" (Tarefas Extratadas) em bullet points, designando responsáveis se citados.
+
+Responda sempre em português do Brasil, de forma clara, objetiva e profissional. Use formatação Markdown quando adequado (**negrito**, listas, etc). Não fale como um robô, mas sim como um parceiro de negócios estratégico.
+`;
   };
 
   const fileToBase64 = (file: File): Promise<string> =>
@@ -145,6 +212,10 @@ Responda sempre em português do Brasil, de forma clara, objetiva e profissional
       };
 
       setMessages(prev => [...prev, assistantMsg]);
+      
+      if (voiceModeEnabled) {
+        speakText(response);
+      }
     } catch (err: any) {
       console.error('Gemini Error:', err);
       const errorMsg = err?.message || 'Erro desconhecido';
@@ -208,6 +279,18 @@ Responda sempre em português do Brasil, de forma clara, objetiva e profissional
             <div>
               <h1 className="text-3xl font-bold text-white tracking-tighter uppercase italic">Assistente Nexus IA</h1>
               <p className="text-sm text-slate-400 mt-1 italic">Powered by Google Gemini 2.0 Flash &amp; Nexus Data Engine</p>
+            </div>
+            <div className="ml-auto flex items-center gap-3 bg-black/40 backdrop-blur-sm p-3 border border-slate-700/50">
+               <span className="text-[10px] font-bold text-white uppercase tracking-widest italic">{voiceModeEnabled ? 'Voz: Ativada' : 'Voz: Desativada'}</span>
+               <button 
+                 onClick={() => {
+                   setVoiceModeEnabled(!voiceModeEnabled);
+                   if (voiceModeEnabled) window.speechSynthesis.cancel();
+                 }}
+                 className={`w-12 h-6 flex items-center rounded-full transition-colors ${voiceModeEnabled ? 'bg-blue-500' : 'bg-slate-700'} px-1`}
+               >
+                 <div className={`w-4 h-4 bg-white rounded-full transition-transform ${voiceModeEnabled ? 'translate-x-6' : 'translate-x-0'}`} />
+               </button>
             </div>
           </div>
         </div>
@@ -311,19 +394,30 @@ Responda sempre em português do Brasil, de forma clara, objetiva e profissional
       <div className="flex gap-2 mt-4 px-2">
         <button
           onClick={() => fileInputRef.current?.click()}
-          title="Anexar arquivo"
+          title="Anexar arquivo/transcrição"
           className="p-4 bg-slate-100 dark:bg-slate-800 border border-slate-200 dark:border-slate-700 text-slate-500 hover:text-blue-600 transition-colors"
         >
           <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M15.172 7l-6.586 6.586a2 2 0 102.828 2.828l6.414-6.586a4 4 0 00-5.656-5.656l-6.415 6.585a6 6 0 108.486 8.486L20.5 13" />
           </svg>
         </button>
-        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx" />
+        <input type="file" ref={fileInputRef} onChange={handleFileChange} className="hidden" accept="image/*,.pdf,.doc,.docx,.txt" />
+        
+        {!!SpeechRecognition && (
+          <button
+            onClick={toggleListening}
+            title="Ditar para o Assistente (Transcrição Live)"
+            className={`p-4 border transition-all ${isListening ? 'bg-red-50 dark:bg-red-900/30 border-red-200 dark:border-red-800 text-red-500 animate-pulse' : 'bg-slate-100 dark:bg-slate-800 border-slate-200 dark:border-slate-700 text-slate-500 hover:text-blue-600'}`}
+          >
+            <svg className="w-6 h-6 outline-none" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M19 11a7 7 0 01-7 7m0 0a7 7 0 01-7-7m7 7v4m0 0H8m4 0h4m-4-8a3 3 0 01-3-3V5a3 3 0 116 0v6a3 3 0 01-3 3z" /></svg>
+          </button>
+        )}
+
         <input
           value={input}
           onChange={e => setInput(e.target.value)}
           onKeyDown={e => e.key === 'Enter' && !e.shiftKey && handleSend()}
-          placeholder="Faça uma pergunta sobre os dados de RH ou anexe um documento..."
+          placeholder={isListening ? 'Ouvindo... (Fale agora)' : "Cole uma transcrição de reunião, faça uma pergunta ou anexe um documento..."}
           className="flex-1 border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 px-6 py-4 text-sm text-slate-900 dark:text-white font-medium outline-none focus:border-blue-600 transition-colors italic placeholder:not-italic placeholder:text-slate-300"
         />
         <button

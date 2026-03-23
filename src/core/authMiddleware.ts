@@ -8,7 +8,9 @@ export interface AuthRequest extends Request {
     tenantId: string;
     role: string;
   };
-  body: any; // Garantindo que o body seja acessível sem erros de tipagem
+  body: any;
+  params: any;
+  query: any;
 }
 
 export const authMiddleware = (req: Request, res: Response, next: NextFunction): void => {
@@ -33,12 +35,10 @@ export const authMiddleware = (req: Request, res: Response, next: NextFunction):
   }
 };
 
-// Middleware utilitário de RBAC (Role-Based Access Control)
 export const requireRoles = (allowedRoles: string[]) => {
   return (req: Request, res: Response, next: NextFunction): void => {
     const user = (req as AuthRequest).user;
     
-    // Admin sempre tem privilégio master bypass
     if (!user || (!allowedRoles.includes(user.role) && user.role !== 'ADMIN')) {
        logger.warn(`Acesso Negado (RBAC) na rota ${req.originalUrl}. Role requerida: ${allowedRoles.join(', ')} | Fornecida: ${user?.role}`);
        res.status(403).json({ success: false, error: 'Acesso Negado: Privilégios hierárquicos insuficientes.' });

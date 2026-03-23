@@ -1,123 +1,111 @@
-import { dbPool } from './database.js';
-import { logger } from './logger.js';
+import dotenv from 'dotenv';
+import bcrypt from 'bcryptjs';
+import { Pool } from '@neondatabase/serverless';
 
-async function seedMegaNeon() {
-  if (!dbPool) {
-    logger.error('Erro: dbPool (Neon) não está ativo. Configure a connection string no .env');
-    process.exit(1);
-  }
+dotenv.config();
 
-  logger.info('Conectando ao NeonDB (PostgreSQL) para injetar o ecossistema completo de IA...');
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 
+async function seed() {
+  console.log('=== SEED NEONDB MASTER ===');
+  
   try {
-    /* =======================================
-       1. CRIAÇÃO DAS TABELAS (SCHEMAS)
-       ======================================= */
-    
-    await dbPool.query(`
-      CREATE TABLE IF NOT EXISTS employees (
-        id SERIAL PRIMARY KEY,
-        tenant_id VARCHAR(50) DEFAULT 'nexus_corporate',
-        name VARCHAR(150),
-        role VARCHAR(100),
-        turnover_risk INT, 
-        engagement_score INT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+    const hash = await bcrypt.hash('123456', 10);
+    const tenantId = 'nexus_corp_saas';
 
-    await dbPool.query(`
-      CREATE TABLE IF NOT EXISTS candidates_ai_analysis (
-        id SERIAL PRIMARY KEY,
-        candidate_name VARCHAR(150),
-        applied_role VARCHAR(100),
-        cv_summary TEXT,
-        ai_match_score INT,
-        ai_generated_questions JSONB,
-        ai_strengths JSONB,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+    // Limpar tudo com CASCADE (seguro para FK)
+    const tablesToClean = [
+      'recognitions', 'communication_posts', 'tickets',
+      'performance_evaluations', 'epi_records', 'medical_certificates', 'health_records',
+      'employee_trainings', 'trainings', 'employee_benefits', 'benefits',
+      'vacations', 'time_records', 'payroll', 'candidates', 'jobs',
+      'employee_history', 'dependents', 'sectors', 'employees', 'users'
+    ];
+    for (const t of tablesToClean) {
+      try { await pool.query(`DELETE FROM ${t}`); } catch(e) { /* tabela pode nao existir */ }
+    }
 
-    await dbPool.query(`
-      CREATE TABLE IF NOT EXISTS ai_assets (
-        id SERIAL PRIMARY KEY,
-        asset_type VARCHAR(50), -- IMAGE, DOCUMENT, NEWSLETTER, REPORT
-        title VARCHAR(200),
-        url TEXT,
-        ai_prompt TEXT,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+    // ========= USERS =========
+    const u1 = await pool.query(`INSERT INTO users (tenant_id, name, email, password_hash, role) VALUES ($1,$2,$3,$4,$5) RETURNING id`, [tenantId, 'Diretor Industrial', 'admin@nexus.com', hash, 'ADMIN']);
+    const u2 = await pool.query(`INSERT INTO users (tenant_id, name, email, password_hash, role) VALUES ($1,$2,$3,$4,$5) RETURNING id`, [tenantId, 'João Supervisor', 'lider@nexus.com', hash, 'LIDER']);
+    const u3 = await pool.query(`INSERT INTO users (tenant_id, name, email, password_hash, role) VALUES ($1,$2,$3,$4,$5) RETURNING id`, [tenantId, 'Ana Operadora', 'ana@nexus.com', hash, 'COLABORADOR']);
 
-    await dbPool.query(`
-      CREATE TABLE IF NOT EXISTS support_tickets (
-        id SERIAL PRIMARY KEY,
-        user_name VARCHAR(150),
-        issue TEXT,
-        ai_resolution TEXT,
-        priority VARCHAR(20),
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
-      );
-    `);
+    // ========= EMPLOYEES =========
+    const e1 = await pool.query(`
+      INSERT INTO employees (tenant_id, registration, name, role, department, contract_type, user_role, salary, hire_date, status, email, cpf, phone, address_street, address_city, address_state, address_zip, bank_name, bank_agency, bank_account, bank_pix, performance_score, vacation_balance)
+      VALUES ($1,'NX001','Ricardo Silva','CTO','Diretoria','CLT','ADMIN',25000,'2022-01-01','Ativo','admin@nexus.com','123.456.789-00','(11) 99999-0001','Av. Paulista, 1000','São Paulo','SP','01310-100','Itaú Unibanco','0001','12345-6','admin@nexus.com',95,30) RETURNING id
+    `, [tenantId]);
 
-    logger.info('Tabelas Globais do RH e GenAI validadas no NeonDB. Resetando registros...');
-    
-    // Deleta os dados antigos para o seed sempre inserir novidades frescas sem poluir
-    await dbPool.query('TRUNCATE employees, candidates_ai_analysis, ai_assets, support_tickets RESTART IDENTITY CASCADE;');
+    const e2 = await pool.query(`
+      INSERT INTO employees (tenant_id, registration, name, role, department, contract_type, user_role, salary, hire_date, status, email, manager_id, cpf, phone, address_street, address_city, address_state, address_zip, bank_name, bank_agency, bank_account, performance_score, vacation_balance)
+      VALUES ($1,'NX002','João Supervisor','Supervisor de Produção','Produção','CLT','MANAGER',8500,'2023-03-15','Ativo','lider@nexus.com',$2,'987.654.321-00','(11) 99999-0002','Rua das Indústrias, 500','Guarulhos','SP','07000-000','Nubank','0001','98765-4',88,20) RETURNING id
+    `, [tenantId, e1.rows[0].id]);
 
-    /* =======================================
-       2. INJEÇÃO DOS DADOS SIMULADOS (MOCKS)
-       ======================================= */
-       
-    logger.info('Populando [Employees] (Turnover Prediction e Engagement)...');
-    await dbPool.query(`
-      INSERT INTO employees (name, role, turnover_risk, engagement_score) VALUES 
-      ('Carlos Souza', 'Engenheiro de Software Sênior', 15, 92),
-      ('Ana Lima', 'Product Manager', 45, 68),
-      ('Juliana Batista', 'Analista de Sucesso do Cliente', 10, 89),
-      ('Roberto Alves', 'Analista Financeiro', 88, 35) -- Risco Crítico
-    `);
+    const e3 = await pool.query(`
+      INSERT INTO employees (tenant_id, registration, name, role, department, contract_type, user_role, salary, hire_date, status, email, manager_id, cpf, phone, address_street, address_city, address_state, address_zip, bank_name, bank_agency, bank_account, performance_score, vacation_balance)
+      VALUES ($1,'NX003','Ana Operadora','Operadora de Prensa','Produção','CLT','EMPLOYEE',4500,'2024-01-10','Ativo','ana@nexus.com',$2,'111.222.333-44','(11) 99999-0003','Rua dos Operários, 100','Osasco','SP','06000-000','Bradesco','1234','56789-0',82,30) RETURNING id
+    `, [tenantId, e2.rows[0].id]);
 
-    logger.info('Populando [Candidates] (CV Analyzer, Job Description, Ranker)...');
-    await dbPool.query(`
-      INSERT INTO candidates_ai_analysis (candidate_name, applied_role, cv_summary, ai_match_score, ai_generated_questions, ai_strengths) VALUES 
-      ('Luiza Mendes', 'Tech Lead', '10 anos de experiência arquitetando microsserviços. Forte base em liderança técnica e GCP.', 96, '["Descreva o desafio mais crítico que arquitetou em nuvem.", "Como resolve um conflito entre desenvolvedores do squaad?"]', '["Liderança Ténica", "Cloud Architecture", "Comunicação"]'),
-      ('Fernando Costa', 'Tech Lead', 'Forte desenvolvedor Backend (Java/Node) sem vivencia corporativa em cargos de gestão de pessoas.', 65, '["Como você supriria a sua falta de vivência liderando diretamente equipes maiores?"]', '["Sólido background técnico em linguagens backend"]'),
-      ('Diana Silva', 'Tech Lead', 'Especialista em React, não adere muito ao perfil backend requisitado pelas nuvens do cargo.', 42, '["Nesta vaga lidaremos bastante com servidores GCP, como você avalia sua curva de aprendizado para sair dos frameworks de UI?"]', '["Excelência em UI/UX"]')
-    `);
+    const emp1Id = e1.rows[0].id, emp2Id = e2.rows[0].id, emp3Id = e3.rows[0].id;
 
-    logger.info('Populando [AI Assets] (Gerador de Imagens, Contratos e Relatórios via IA)...');
-    await dbPool.query(`
-      INSERT INTO ai_assets (asset_type, title, url, ai_prompt) VALUES 
-      ('IMAGE', 'Badge de Onboarding - Nível Ouro', 'https://api.nexus-hr.tech/cdn/images/badge-onboard-3.png', 'Generate a high quality flat vector 2D icon of a golden medal for corporate onboarding, professional style...'),
-      ('DOCUMENT', 'Contrato de Trabalho Padrão CLT - Ana Lima', 'https://api.nexus-hr.tech/cdn/docs/clt-ana-lima.pdf', 'Redija um modelo de contrato de trabalho por tempo indeterminado regido pela CLT. Insira cláusulas de propriedade intelectual e remuneração sigilosa para Ana Lima.'),
-      ('NEWSLETTER', 'ComunicaRH - Highlights de Março', 'https://api.nexus-hr.tech/cdn/news/mar-26.html', 'Componha um boletim interno caloroso engajando o time de tecnologia sobre as metas atingidas em Março de 2026...'),
-      ('REPORT', 'Auditoria Semestral de Turnover Q3', 'https://api.nexus-hr.tech/cdn/reports/turnover-q3.json', 'Consolide os dados brutos de entrada x saídas de funcionários no periodo e cruze com o Score de Engajamento para listar previsoes...')
-    `);
+    // ========= DEPENDENTS =========
+    await pool.query(`INSERT INTO dependents (employee_id, name, type, dob) VALUES ($1, 'Júlia Silva', 'Filha', '2015-05-12')`, [emp1Id]);
+    await pool.query(`INSERT INTO dependents (employee_id, name, type, dob) VALUES ($1, 'Pedro Oliveira', 'Filho', '2020-08-20')`, [emp3Id]);
 
-    logger.info('Populando [Support & HelpDesk] (Assistente de Chat e Triagem de Ticket Skill)...');
-    await dbPool.query(`
-      INSERT INTO support_tickets (user_name, issue, ai_resolution, priority) VALUES 
-      ('Ana Lima', 'Como funciona a política de de reembolso médico e de transporte uber para off-sites?', 'Conforme a política oficial da cia, reembolsos devem ser abertos no Portal SAP anexando NFs em até 5 dias após a despesa médica ou viagem.', 'BAIXA'),
-      ('Roberto Alves', 'Estou sem acesso para subir planilhas no Modulo de Analytics!', 'Ação IA Automática: Encaminhando ticket diretamente para ACL Nível 2 (Infra/TI Cloud). Causa raiz aparentada: Token expirado ou faltando claiims no JWT Role Mappings.', 'ALTA'),
-      ('Juliana Batista', 'Preciso adiantar minhas férias em 1 semana por imprevisto familiar.', 'Aviso IA: Solicitações de alteração de gozo de férias fora do período legal de aviso restrito de 30 dias demandam abertura de chamado direto para o BP (Business Partner) do seu time.', 'MÉDIA')
-    `);
+    // ========= HISTORY =========
+    await pool.query(`INSERT INTO employee_history (employee_id, date, event, role, salary) VALUES ($1, '2022-01-01', 'Admissão', 'CTO', 25000)`, [emp1Id]);
+    await pool.query(`INSERT INTO employee_history (employee_id, date, event, role, salary) VALUES ($1, '2023-03-15', 'Admissão', 'Supervisor', 8500)`, [emp2Id]);
+    await pool.query(`INSERT INTO employee_history (employee_id, date, event, role, salary) VALUES ($1, '2024-01-10', 'Admissão', 'Operadora', 4500)`, [emp3Id]);
 
-    logger.info('----------------------------------------------------');
-    logger.info('✅ MEGA SEED DO NEON CONCLUÍDO COM SUCESSO! ✅');
-    logger.info('Todas as Tabelas Corporativas do SaaS e suas Analises de IA formatadas (JSON, Scores, Vectors) foram salvas no PostgreSQL de Produção!');
-    logger.info('----------------------------------------------------');
-    
-    // Verificacao
-    const stats = await dbPool.query('SELECT COUNT(*) as total_candidates FROM candidates_ai_analysis;');
-    console.log(stats.rows[0]);
-    
-    process.exit(0);
+    // ========= SECTORS =========
+    await pool.query(`INSERT INTO sectors (tenant_id, name, leader_id, trainings, productivity, best_employee_id) VALUES ($1, 'Estampagem Pesada', $2, $3, 88.5, $4)`, [tenantId, emp2Id, ['Segurança em Prensas (NR-12)', 'Integração Nexus', 'Operação de Ponte Rolante'], emp3Id]);
+    await pool.query(`INSERT INTO sectors (tenant_id, name, leader_id, trainings, productivity) VALUES ($1, 'Logística de Expedição', $2, $3, 92.1)`, [tenantId, emp1Id, ['Direção Defensiva de Empilhadeira', 'Gestão de Estoques']]);
+    await pool.query(`INSERT INTO sectors (tenant_id, name, leader_id, trainings, productivity) VALUES ($1, 'Tecnologia da Informação', $2, $3, 94.3)`, [tenantId, emp1Id, ['Segurança da Informação', 'LGPD', 'Cultura DevOps']]);
+
+    // ========= JOBS =========
+    await pool.query(`INSERT INTO jobs (tenant_id, title, department, status, priority, description, requirements, salary_range) VALUES ($1, 'Desenvolvedor Frontend Sênior', 'Engenharia', 'Open', 'High', 'Liderança técnica frontend.', 'React 18+, TypeScript, Tailwind CSS.', 'R$ 12k - 16k')`, [tenantId]);
+
+    // ========= CANDIDATES =========
+    await pool.query(`INSERT INTO candidates (tenant_id, name, email, applied_role, cv_text, status) VALUES ($1, 'Marcos Santos', 'marcos@email.com', 'Desenvolvedor Frontend Sênior', '5 anos com React, TypeScript e Node.js. Formado em CC pela USP.', 'Pendente')`, [tenantId]);
+    await pool.query(`INSERT INTO candidates (tenant_id, name, email, applied_role, cv_text, status) VALUES ($1, 'Carla Mendes', 'carla@email.com', 'Analista de Logística', '7 anos em gestão de estoques. MBA em Supply Chain.', 'Entrevista')`, [tenantId]);
+
+    // ========= BENEFITS =========
+    await pool.query(`INSERT INTO benefits (tenant_id, name, provider, type, base_cost, eligibility) VALUES ($1, 'Plano de Saúde Bradesco', 'Bradesco Saúde', 'Saúde', 450, 'Todos')`, [tenantId]);
+    await pool.query(`INSERT INTO benefits (tenant_id, name, provider, type, base_cost, eligibility) VALUES ($1, 'Vale Alimentação Sodexo', 'Sodexo', 'Alimentação', 600, 'CLT')`, [tenantId]);
+    await pool.query(`INSERT INTO benefits (tenant_id, name, provider, type, base_cost, eligibility) VALUES ($1, 'Seguro de Vida MetLife', 'MetLife', 'Seguro', 80, 'Todos')`, [tenantId]);
+
+    // ========= TRAININGS =========
+    await pool.query(`INSERT INTO trainings (tenant_id, name, category, duration_hours, instructor, is_mandatory) VALUES ($1, 'Cultura Nexus', 'Integração', 4, 'RH', true)`, [tenantId]);
+    await pool.query(`INSERT INTO trainings (tenant_id, name, category, duration_hours, instructor, is_mandatory) VALUES ($1, 'Segurança da Informação', 'Compliance', 2, 'TI', true)`, [tenantId]);
+    await pool.query(`INSERT INTO trainings (tenant_id, name, category, duration_hours, instructor, is_mandatory, target_departments) VALUES ($1, 'Operação de Prensas (NR-12)', 'Obrigatório', 8, 'Eng. Segurança', true, $2)`, [tenantId, ['Produção']]);
+    await pool.query(`INSERT INTO trainings (tenant_id, name, category, duration_hours, instructor, is_mandatory) VALUES ($1, 'Liderança Situacional', 'Desenvolvimento', 16, 'Consultoria RH', false)`, [tenantId]);
+
+    // ========= TIME RECORDS =========
+    const today = new Date().toISOString().split('T')[0];
+    await pool.query(`INSERT INTO time_records (tenant_id, employee_id, date, type, timestamp) VALUES ($1, $2, $3, 'Entrada', '07:58:00')`, [tenantId, emp3Id, today]);
+    await pool.query(`INSERT INTO time_records (tenant_id, employee_id, date, type, timestamp) VALUES ($1, $2, $3, 'Intervalo Início', '12:00:00')`, [tenantId, emp3Id, today]);
+    await pool.query(`INSERT INTO time_records (tenant_id, employee_id, date, type, timestamp) VALUES ($1, $2, $3, 'Intervalo Fim', '13:00:00')`, [tenantId, emp3Id, today]);
+
+    // ========= HEALTH =========
+    await pool.query(`INSERT INTO health_records (tenant_id, employee_id, type, date, status, next_exam, doctor_name) VALUES ($1, $2, 'Admissional', '2024-01-05', 'Apto', '2025-01-05', 'Dr. Paulo Meira')`, [tenantId, emp3Id]);
+    await pool.query(`INSERT INTO health_records (tenant_id, employee_id, type, date, status, next_exam) VALUES ($1, $2, 'Periódico', '2024-06-15', 'Apto', '2025-06-15')`, [tenantId, emp2Id]);
+
+    // ========= TICKETS =========
+    await pool.query(`INSERT INTO tickets (tenant_id, requester_id, subject, description) VALUES ($1, $2, 'Dúvida sobre Férias', 'Como funciona o cálculo de 1/3 constitucional?')`, [tenantId, emp3Id]);
+
+    // ========= COMMUNICATION =========
+    await pool.query(`INSERT INTO communication_posts (tenant_id, author_id, type, title, content) VALUES ($1, $2, 'comunicado', 'Bem-vindos ao Nexus RH!', 'Estamos felizes em apresentar o novo sistema de gestão de pessoas Nexus RH.')`, [tenantId, emp1Id]);
+    await pool.query(`INSERT INTO communication_posts (tenant_id, author_id, type, title, content) VALUES ($1, $2, 'evento', 'Workshop de Segurança — NR-12', 'Convidamos todos do setor de Estampagem para o workshop obrigatório.')`, [tenantId, emp2Id]);
+
+    console.log('=== SEED NEONDB CONCLUÍDO ===');
+    console.log('Users: 3 | Employees: 3 | Sectors: 3 | Benefits: 3 | Trainings: 4');
+    console.log('Logins: admin@nexus.com / lider@nexus.com / ana@nexus.com (senha: 123456)');
   } catch (err) {
-    logger.error('Transação Falhou ao salvar massivamente no Neon:', err);
-    process.exit(1);
+    console.error('ERRO NO SEED:', err);
+  } finally {
+    await pool.end();
+    process.exit(0);
   }
 }
 
-seedMegaNeon();
+seed();

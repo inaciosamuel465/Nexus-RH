@@ -3,6 +3,9 @@ import { useHR } from '../context/HRContext';
 import { HealthRecord, EPIRecord, Employee, HealthRecordType } from '../types';
 
 const CertificateModal: React.FC<{ isOpen: boolean; onClose: () => void; employees: Employee[]; onSave: (data: any) => void }> = ({ isOpen, onClose, employees, onSave }) => {
+  const [reasonCategory, setReasonCategory] = useState('');
+  const [reasonDetails, setReasonDetails] = useState('');
+
   if (!isOpen) return null;
   return (
     <div className="fixed inset-0 z-[200] flex items-center justify-center p-4 bg-slate-900/60 backdrop-blur-sm animate-fadeIn">
@@ -23,14 +26,16 @@ const CertificateModal: React.FC<{ isOpen: boolean; onClose: () => void; employe
           const end = new Date(fd.get('endDate') as string);
           const days = Math.ceil((end.getTime() - start.getTime()) / (1000 * 60 * 60 * 24)) + 1;
           
+          const finalReason = reasonCategory + (reasonDetails ? ` - ${reasonDetails}` : '');
+          
           onSave({
             employeeId: fd.get('employeeId'),
             startDate: fd.get('startDate'),
             endDate: fd.get('endDate'),
             days,
-            reason: fd.get('reason'),
-            doctorName: fd.get('doctor'),
-            crm: fd.get('crm'),
+            reason: finalReason,
+            doctorName: fd.get('doctor') || 'N/A',
+            crm: fd.get('crm') || 'N/A',
             abonoHoras: fd.get('abono') === 'on'
           });
           onClose();
@@ -53,17 +58,47 @@ const CertificateModal: React.FC<{ isOpen: boolean; onClose: () => void; employe
                    <input name="endDate" type="date" required className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent" />
                 </div>
              </div>
-             <div className="grid grid-cols-2 gap-6">
-                <input name="doctor" required placeholder="Nome do Médico" className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent" />
-                <input name="crm" required placeholder="CRM/UF" className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent" />
+             
+             <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Classificação do Motivo</label>
+                <select 
+                  value={reasonCategory} 
+                  onChange={(e) => setReasonCategory(e.target.value)} 
+                  required 
+                  className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent"
+                >
+                   <option value="">Selecione a Categoria...</option>
+                   <option value="Atestado Médico (Doença)">Atestado Médico (Doença / CID)</option>
+                   <option value="Declaração de Horas (Consulta)">Declaração de Horas (Consulta/Exame)</option>
+                   <option value="Acompanhamento Familiar">Acompanhamento Familiar</option>
+                   <option value="Licença Maternidade/Paternidade">Licença Maternidade / Paternidade</option>
+                   <option value="Doação de Sangue">Doação de Sangue</option>
+                   <option value="Óbito em Família">Óbito em Família</option>
+                   <option value="Outros">Outros Motivos Legais</option>
+                </select>
              </div>
-             <textarea name="reason" placeholder="Motivo / CID" required className="w-full h-20 border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors resize-none placeholder:text-slate-300 bg-transparent" />
+
+             <div className="space-y-1.5">
+                <label className="text-[10px] font-bold text-slate-500 uppercase tracking-widest ml-1">Detalhes (Opcional)</label>
+                <input 
+                  value={reasonDetails} 
+                  onChange={(e) => setReasonDetails(e.target.value)} 
+                  placeholder="Ex: CID X99.9, Hospital Central..." 
+                  className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent" 
+                />
+             </div>
+
+             <div className="grid grid-cols-2 gap-6">
+                <input name="doctor" placeholder="Nome do Médico (se houver)" className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent" />
+                <input name="crm" placeholder="CRM/UF (se houver)" className="w-full border-b border-slate-200 py-2 text-sm text-slate-900 outline-none focus:border-red-600 transition-colors bg-transparent" />
+             </div>
+             
              <label className="flex items-center gap-3 p-4 bg-red-50 border border-red-100 cursor-pointer">
                 <input name="abono" type="checkbox" className="w-4 h-4 accent-red-600" />
                 <span className="text-[10px] font-bold text-red-600 uppercase tracking-widest italic">Abonar automaticamente no controle de ponto</span>
              </label>
           </div>
-          <button type="submit" className="w-full py-4 bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg">Confirmar Protocolo Médico</button>
+          <button type="submit" disabled={!reasonCategory} className="w-full py-4 bg-red-600 text-white text-[10px] font-bold uppercase tracking-widest hover:bg-red-700 transition-all shadow-lg disabled:opacity-50">Confirmar Protocolo Médico</button>
         </form>
       </div>
     </div>

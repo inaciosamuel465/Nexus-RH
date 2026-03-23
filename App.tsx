@@ -31,6 +31,7 @@ const App: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   const location = useLocation();
   const navigate = useNavigate();
   const [isDark, setIsDark] = useState(() => localStorage.getItem('nexus_theme') === 'dark');
+  const [isSidebarOpen, setIsSidebarOpen] = useState(false);
   const isLoginPage = location.pathname === '/login';
 
   useEffect(() => {
@@ -49,9 +50,23 @@ const App: React.FC<{ children: React.ReactNode }> = ({ children }) => {
   }
 
   return (
-    <div className={`flex h-screen bg-transparent font-['Inter'] transition-colors duration-500 ${isDark ? 'dark text-white' : 'text-slate-900'}`}>
+    <div className={`flex h-screen bg-transparent font-['Inter'] transition-colors duration-500 overflow-hidden ${isDark ? 'dark text-white' : 'text-slate-900'}`}>
+      {/* Overlay para fechar sidebar no mobile */}
+      {isSidebarOpen && (
+        <div 
+          className="fixed inset-0 bg-slate-950/40 backdrop-blur-sm z-40 lg:hidden transition-opacity duration-300"
+          onClick={() => setIsSidebarOpen(false)}
+        />
+      )}
+
       {/* Sidebar Corporativo Premium */}
-      <aside className="w-72 border-r border-slate-100 dark:border-slate-800/50 flex flex-col bg-white/70 dark:bg-slate-950/70 backdrop-blur-3xl overflow-hidden shadow-2xl transition-colors duration-500">
+      <aside className={`
+        fixed inset-y-0 left-0 lg:static lg:translate-x-0 z-50
+        w-72 border-r border-slate-100 dark:border-slate-800/50 flex flex-col 
+        bg-white/80 dark:bg-slate-950/80 backdrop-blur-3xl overflow-hidden shadow-2xl 
+        transition-all duration-500 ease-in-out
+        ${isSidebarOpen ? 'translate-x-0' : '-translate-x-full'}
+      `}>
         <div className="p-8 border-b border-slate-50/50 dark:border-slate-800/50 bg-transparent">
           <div className="flex justify-between items-center mb-6">
             <h1 className="text-2xl font-bold text-slate-900 dark:text-white tracking-tighter flex items-center gap-4 italic group cursor-pointer" onClick={() => navigate('/dashboard')}>
@@ -80,6 +95,8 @@ const App: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           
           <SectionHeader label="Ciclos Operacionais" />
           <SidebarLink to="/payroll" label="Fluxo Financeiro" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
+          <SidebarLink to="/time-tracking" label="Controle de Ponto" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" /></svg>} />
+          <SidebarLink to="/vacation" label="Gestão de Férias" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" /></svg>} />
           <SidebarLink to="/performance" label="Audit de Performance" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" /></svg>} />
           <SidebarLink to="/recruitment" label="Filtro de Talentos" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M21 13.255A23.931 23.931 0 0112 15c-3.183 0-6.22-.62-9-1.745M16 6V4a2 2 0 00-2-2h-4a2 2 0 00-2 2v2m4 6h.01M5 20h14a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z" /></svg>} />
           <SidebarLink to="/safety" label="Saúde & Compliance" icon={<svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m5.618-4.016A11.955 11.955 0 0112 2.944a11.955 11.955 0 01-8.618 3.04A12.02 12.02 0 003 9c0 5.591 3.824 10.29 9 11.622 5.176-1.332 9-6.03 9-11.622 0-1.042-.133-2.052-.382-3.016z" /></svg>} />
@@ -125,10 +142,19 @@ const App: React.FC<{ children: React.ReactNode }> = ({ children }) => {
 
       {/* Área de Conteúdo Principal */}
       <div className="flex-1 flex flex-col min-w-0 bg-transparent transition-colors duration-500 relative z-0">
-        <header className="h-20 border-b border-slate-100/50 dark:border-slate-800/50 flex items-center justify-between px-10 bg-white/70 dark:bg-slate-950/70 backdrop-blur-3xl z-20 shadow-sm">
-          <div className="flex items-center gap-6">
-             <div className="w-1 h-8 bg-blue-600 dark:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.5)]"></div>
-             <h2 className="text-xs font-bold text-slate-950 dark:text-white uppercase tracking-[0.4rem] leading-none italic">
+        <header className="h-16 md:h-20 border-b border-slate-100/50 dark:border-slate-800/50 flex items-center justify-between px-4 md:px-10 bg-white/70 dark:bg-slate-950/70 backdrop-blur-3xl z-20 shadow-sm">
+          <div className="flex items-center gap-3 md:gap-6">
+             <button 
+                onClick={() => setIsSidebarOpen(!isSidebarOpen)}
+                className="p-2 lg:hidden text-slate-500 hover:text-blue-600 transition-colors"
+                aria-label="Abrir Menu"
+             >
+                <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d={isSidebarOpen ? "M6 18L18 6M6 6l12 12" : "M4 6h16M4 12h16M4 18h16"} />
+                </svg>
+             </button>
+             <div className="hidden md:block w-1 h-8 bg-blue-600 dark:bg-blue-500 shadow-[0_0_15px_rgba(37,99,235,0.5)]"></div>
+             <h2 className="text-[10px] md:text-xs font-bold text-slate-950 dark:text-white uppercase tracking-[0.2em] md:tracking-[0.4rem] leading-none italic truncate">
                 {location.pathname.replace('/', '').replace(/-/g, ' ') || 'Dashboard'}
              </h2>
           </div>
@@ -142,7 +168,7 @@ const App: React.FC<{ children: React.ReactNode }> = ({ children }) => {
           </div>
         </header>
 
-        <main className="flex-1 overflow-y-auto p-10 animate-fadeIn bg-transparent transition-colors duration-500">
+        <main className="flex-1 overflow-y-auto p-4 md:p-10 animate-fadeIn bg-transparent transition-colors duration-500">
           <div className="max-w-[1500px] mx-auto h-full">
             {children}
           </div>
