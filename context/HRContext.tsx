@@ -9,8 +9,10 @@ import {
 import { 
   employeeApi, recruitmentApi, payrollApi, timeApi, vacationApi, 
   benefitApi, trainingApi, safetyApi, commApi, performanceApi, 
+  benefitApi, trainingApi, safetyApi, commApi, performanceApi, 
   sectorApi 
 } from '../services/api';
+import { API_BASE } from '../src/config';
 
 interface HRContextType {
   employees: Employee[];
@@ -149,7 +151,7 @@ export const HRProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
 
   const login = async (email: string, password: string) => {
     try {
-      const resp = await fetch('http://localhost:3001/api/auth/login', {
+      const resp = await fetch(`${API_BASE}/api/auth/login`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ email, password })

@@ -1,4 +1,5 @@
-const API_BASE = 'http://localhost:3001';
+import { API_BASE as CONFIG_API_BASE } from '../src/config';
+const API_BASE = CONFIG_API_BASE;
 
 function getToken(): string | null {
   return localStorage.getItem('nexus_token');
